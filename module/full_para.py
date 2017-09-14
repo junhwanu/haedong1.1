@@ -7,6 +7,7 @@ import db
 previous_profit = 0
 temp_index = 0
 
+
 def is_it_OK(subject_code, current_price):
     global previous_profit
     global temp_index
