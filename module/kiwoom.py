@@ -14,7 +14,6 @@ from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
 import db
 import health_server
-
 kiwoom = None
 
 def get_instance():
@@ -89,8 +88,8 @@ class api():
                 print("연결 성공")
 
                 # auto login
-                login_thr = auto_login.Login()
-                login_thr.start()
+                self.login_thr = auto_login.Login()
+                self.login_thr.start()
 
                 # health server run
                 self.health_server_thread = health_server.HealthConnectManager()
@@ -147,6 +146,7 @@ class api():
         self.set_input_value("비밀번호", "")
         self.set_input_value("비밀번호입력매체", "00")
         self.comm_rq_data("예수금및증거금현황조회", "opw30009", "", screen.S0011)
+        print("get_my_deposit_info thread : %s" % threading.current_thread().__class__.__name__)
 
     def get_futures_deposit(self):
         lists = ['MTL','ENG','CUR','IDX','CMD']
@@ -420,6 +420,7 @@ class api():
                                 self.current_candle[subject_code].append(float(self.candle_data[subject_code][5]))
                                 self.current_candle[subject_code].append(float(self.candle_data[subject_code][6]))
                                 log.debug('지난 데이터 수신 완료.')
+
                             else:
                                 log.debug('지난 데이터 수신 요청.')
                                 data = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
@@ -970,12 +971,12 @@ class api():
             # 계좌번호 저장
             self.account = self.get_login_info("ACCNO")
             log.info("계좌번호 : " + self.account)
-            
+            contract.account = self.account
+
             if d.get_mode() == d.REAL:   
                 # 다이나믹 종목 정보 요청
                 self.get_dynamic_subject_code()
                 self.get_futures_deposit()
-                self.get_my_deposit_info()
 
                 # 종목 정보 로그 찍기
                 log.info("참여 종목 : %s" % subject.info.values())
@@ -1135,4 +1136,3 @@ class api():
         
     def delete_jango_to_db(self,subject_code): 
         self.jango_db.delete_db_contract(subject_code)
-            

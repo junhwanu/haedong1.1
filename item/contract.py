@@ -9,6 +9,7 @@ ALL = '전체'
 
 my_deposit = 0
 recent_trade_cnt = 0
+account = ''
 
 def add_contract(order_info, order_contents): # 계약타입(목표달성 청산 또는 달성 후 드리블)
     """

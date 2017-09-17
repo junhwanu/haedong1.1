@@ -11,7 +11,6 @@ import cv2
 from PIL import Image
 import module
 
-
 class Login(threading.Thread):
     REAL_INVEST = False
     AUTO_LOGIN = True
@@ -113,7 +112,7 @@ class Login(threading.Thread):
         icon = Image.open(self.MODULE_PATH + '/../resource/kf.png')
 
         while True:
-            icon_position = pyautogui.locateCenterOnScreen(icon, region=(x - 400, y - 100, 400, 100), confidence=.5)
+            icon_position = pyautogui.locateCenterOnScreen(icon, region=(x - 400, y - 100, 400, 100), confidence=.9)
 
             if icon_position:
                 print("더미 아이콘 제거." + str(icon_position))
@@ -133,7 +132,7 @@ class Login(threading.Thread):
 
         while True:
             print("트레이 아이콘을 찾는 중입니다.")
-            icon_position = pyautogui.locateCenterOnScreen(icon, region=(x - 400, y - 100, 400, 100), confidence=.5)
+            icon_position = pyautogui.locateCenterOnScreen(icon, region=(x - 400, y - 100, 400, 100), confidence=.9)
             time.sleep(2)
 
             if icon_position:
@@ -153,9 +152,12 @@ class Login(threading.Thread):
         dlg = pywinauto.timings.WaitUntilPasses(20, 0.5, lambda: app.window_(title="계좌번호관리"))
 
         try:
+            time.sleep(.5)
             dlg.Edit1.Click()
             time.sleep(.5)
-            dlg.Edit1.send_keystrokes(self.ACCOUNT_PASSWD)
+            #pyautogui.typewrite(self.ACCOUNT_PASSWD)
+            dlg.Edit1.send_chars(self.ACCOUNT_PASSWD)
+            #dlg.Edit1.send_keystrokes(self.ACCOUNT_PASSWD)
             time.sleep(.5)
             dlg.Button3.Click()
             time.sleep(.5)
