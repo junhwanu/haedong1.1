@@ -13,7 +13,7 @@ def sendMessage(msg, account):
         id_list.append(330172669) # ����
     elif account == '5105855972':
         id_list.append(285446312) # ����
-    elif account =='51115392':
+    elif account =='5111539272':
         id_list.append(377943640) # ����
 
     if len(id_list) == 0: return
