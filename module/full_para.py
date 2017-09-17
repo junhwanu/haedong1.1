@@ -185,7 +185,7 @@ def is_it_OK(subject_code, current_price):
         log.info("매매 예정 수량은 %s개 입니다." % contract_cnt)
 
         if int(contract.my_deposit) == 0:
-            if contract.account == '5105855972': contract_cnt = 3
+            if contract.account == '5105855972': contract_cnt = 4
             elif contract.account == '51115392': contract_cnt = 1
             elif contract.account == '5107243872': contract_cnt = 2
     else:

@@ -146,7 +146,6 @@ class api():
         self.set_input_value("비밀번호", "")
         self.set_input_value("비밀번호입력매체", "00")
         self.comm_rq_data("예수금및증거금현황조회", "opw30009", "", screen.S0011)
-        print("get_my_deposit_info thread : %s" % threading.current_thread().__class__.__name__)
 
     def get_futures_deposit(self):
         lists = ['MTL','ENG','CUR','IDX','CMD']
