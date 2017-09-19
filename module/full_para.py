@@ -186,7 +186,7 @@ def is_it_OK(subject_code, current_price):
 
         if int(contract.my_deposit) == 0:
             if contract.account == '5105855972': contract_cnt = 4
-            elif contract.account == '51115392': contract_cnt = 1
+            elif contract.account == '5111539272': contract_cnt = 1
             elif contract.account == '5107243872': contract_cnt = 2
     else:
         contract_cnt = 2 #테스트 돌릴때
