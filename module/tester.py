@@ -13,7 +13,7 @@ def init():
 
     start_date = input()
     #end_date = get_yesterday()
-    end_date = '20999999'
+    end_date = '20171001'
     #end_date = str(int(start_date) + 1)
     print('종목코드를 입력하세요. (ex. CL)')
     subject_code = input()
@@ -129,7 +129,7 @@ def get_yesterday():
 def connect():
     global curs
     global conn
-    conn = pymysql.connect(host='211.253.28.132', user='root', password='goehddl', db='haedong', charset='utf8')
+    conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong', charset='utf8')
     curs = conn.cursor()
 
 def disconnect():
@@ -142,6 +142,7 @@ def read_tick(table_name):
     global curs
     global conn
     query = "select date, price, volume, working_day from %s"%table_name
+    #query = "select date, now_price, volume, working_day from %s"%table_name
     curs.execute(query)
     conn.commit()   
     
