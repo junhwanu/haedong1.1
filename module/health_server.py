@@ -52,6 +52,10 @@ class HealthConnectManager(threading.Thread):
 
     def print_status(self):
         print(self.__getattribute__())
+        
+    def server_close(self):
+        if self.server is not None:
+            self.server.shutdown()
 
 
 if __name__ == '__main__':
