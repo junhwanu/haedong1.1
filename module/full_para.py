@@ -99,11 +99,11 @@ def is_it_OK(subject_code, current_price):
 
     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == calc.data[subject_code]['체결시간'][-1]: # 반전 후 SAR로 갱신되었다면
 
-        if subject.info[subject_code]['맞틀리스트'][-5:] == ['맞','틀','틀','틀','틀']:
-            log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
-            pass
+        #if subject.info[subject_code]['맞틀리스트'][-5:] == ['맞','틀','틀','틀','틀']:
+        #    log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
+        #    pass
         
-        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞','맞','틀']:
+        if subject.info[subject_code]['맞틀리스트'][-3:] == ['맞','맞','틀']:
 
             log.info("맞맞틀 다음으로 매매 진입합니다.")
             pass
@@ -134,11 +134,11 @@ def is_it_OK(subject_code, current_price):
             return false
            
     else:
-        if subject.info[subject_code]['맞틀리스트'][-4:] == ['맞','틀','틀','틀'] and profit < 0:
-            log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
-            pass
+        #if subject.info[subject_code]['맞틀리스트'][-4:] == ['맞','틀','틀','틀'] and profit < 0:
+        #    log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
+        #    pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞','맞'] and profit < 0:
+        if subject.info[subject_code]['맞틀리스트'][-2:] == ['맞','맞'] and profit < 0:
             log.info("맞맞틀 다음으로 매매 진입합니다.")
             pass
 
