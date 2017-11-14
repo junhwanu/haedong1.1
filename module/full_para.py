@@ -108,17 +108,34 @@ def is_it_OK(subject_code, current_price):
     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
             calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
 
-        #if subject.info[subject_code]['맞틀리스트'][-5:] == ['맞', '틀', '틀', '틀', '틀']:
-        #    log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
-        #    pass
-
-        if subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '틀']:
-
-            log.info("맞맞틀 다음으로 매매 진입합니다.")
+        if subject.info[subject_code]['맞틀리스트'][-4:] == ['틀','틀', '틀', '틀']:
+            log.info("틀틀틀틀 다음으로 매매 진입합니다.")
             pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞']:
-            log.info("틀맞맞 다음으로 매매 진입합니다.")
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀','맞', '맞', '틀']:
+            log.info("틀맞맞틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀','맞', '틀', '틀']:
+
+            log.info("틀맞틀틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞','틀', '틀', '맞']:
+
+            log.info("맞틀틀맞 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '맞']:
+            log.info("틀틀틀맞 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '맞', '틀']:
+            log.info("맞맞맞틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '맞', '맞']:
+            log.info("틀틀맞맞 다음으로 매매 진입합니다.")
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
@@ -145,16 +162,32 @@ def is_it_OK(subject_code, current_price):
             return false
 
     else:
-        #if subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '틀'] and profit < 0:
-        #    log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
-        #    pass
-
-        if subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '맞'] and profit < 0:
-            log.info("맞맞틀 다음으로 매매 진입합니다.")
+        if subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit < 0:
+            log.info("틀틀틀틀 다음으로 매매 진입합니다.")
             pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit > 0:
-            log.info("틀맞맞 다음으로 매매 진입합니다.")
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞'] and profit < 0:
+            log.info("틀맞맞틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀'] and profit < 0:
+            log.info("틀맞틀틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
+            log.info("맞틀틀맞 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit > 0:
+            log.info("틀틀틀맞 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '맞'] and profit < 0:
+            log.info("맞맞맞틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '맞'] and profit > 0:
+            log.info("틀틀맞맞 다음으로 매매 진입합니다.")
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
@@ -164,6 +197,7 @@ def is_it_OK(subject_code, current_price):
             else:
                 log.info("틀맞틀 다음으로 매매 진입합니다.")
                 pass
+
 
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
             if mesu_medo_type == '신규매도':
@@ -356,7 +390,7 @@ def is_it_sell(subject_code, current_price):
                         res.info("손절가가 되어 " + str(contract_num) + "개 청산 요청.")
                         return {'신규주문': True, '매도수구분': '신규매수', '수량': contract_num}
                     else:
-                        #1차 청산 이후 청산 일 때
+                        #1차 청산 이후 청산 일 때t
                         res.info("손절가가 되어 " + str(contract.list[subject_code]['계약타입'][contract.SAFE] +
                                                   contract.list[subject_code]['계약타입'][
                                                       contract.DRIBBLE]) + "개 청산 요청.")
