@@ -233,7 +233,8 @@ def is_it_OK(subject_code, current_price):
         if contract.recent_trade_cnt == possible_contract_cnt:
             contract_cnt = possible_contract_cnt
         log.info("매매 예정 수량은 %s개 입니다." % contract_cnt)
-        if contract_cnt < 2:
+        if contract_cnt == 0:
+            #contract_cnt = 1
             contract_cnt = 2
     else:
         contract_cnt = 2  # 테스트 돌릴때
