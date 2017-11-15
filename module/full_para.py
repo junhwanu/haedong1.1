@@ -142,13 +142,13 @@ def is_it_OK(subject_code, current_price):
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
+
             if subject.info[subject_code]['수익리스트'][-2] > 70:
                 log.info("지지난 플로우가 70이상 수익으로 진입안합니다.")
                 return false
             else:
                 log.info("틀맞틀 다음으로 매매 진입합니다.")
                 pass
-            pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '맞'] and profit > reverse_tic:
             if mesu_medo_type == '신규매도':
@@ -159,10 +159,10 @@ def is_it_OK(subject_code, current_price):
             ma_line_is_true = True
             subject.info[subject_code]['반대매매'] = True
 
+
         else:
             log.info("맞틀 조건이 맞지 않아 매매 포기합니다.")
             return false
-
 
     else:
         if subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit < 0:
@@ -207,8 +207,6 @@ def is_it_OK(subject_code, current_price):
                 pass
 
 
-
-
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
             if mesu_medo_type == '신규매도':
                 mesu_medo_type = '신규매수'
@@ -223,15 +221,13 @@ def is_it_OK(subject_code, current_price):
             log.info("맞틀 조건이 맞지 않아 매매 포기합니다.")
             return false
 
-
-
     if ma_line_is_true == False: return false
 
     if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code][
         '반대매매'] == False:
         log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
         return false
-    if get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
+    elif get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
             subject.info[subject_code]['마감시간']):
         log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
         return false
@@ -250,6 +246,12 @@ def is_it_OK(subject_code, current_price):
     else:
         contract_cnt = 2  # 테스트 돌릴때
 
+    # heejun add `17.11.15
+    if contract_cnt > 1:
+        subject.info[subject_code]['신규매매수량'] = contract_cnt
+    elif contract_cnt == 1:
+        subject.info[subject_code]['신규매매수량'] = 2 #1계약만 살수 있을 때 신규매매수량이 1이면 1차 청산 되어버려 2로 고정
+
     # heejun add `17.8.16
     number_of_current_contract = int(contract.get_contract_count(subject_code))
     if number_of_current_contract > 0 and subject.info[subject_code][
@@ -263,7 +265,7 @@ def is_it_OK(subject_code, current_price):
 
     if contract_cnt == 0: return false
 
-    subject.info[subject_code]['신규매매수량'] = contract_cnt
+    #subject.info[subject_code]['신규매매수량'] = contract_cnt
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
     subject.info[subject_code]['주문내용'] = order_contents
     log.debug('para.is_it_OK() : 모든 구매조건 통과.')
