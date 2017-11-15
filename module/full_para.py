@@ -238,7 +238,13 @@ def is_it_OK(subject_code, current_price):
             contract_cnt = 2
     else:
         contract_cnt = 2  # 테스트 돌릴때
-
+        
+    # heejun add `17.11.15
+    if contract_cnt > 1:
+        subject.info[subject_code]['신규매매수량'] = contract_cnt
+    elif contract_cnt == 1:
+        subject.info[subject_code]['신규매매수량'] = 2 #1   1 1   2 고정
+        
     # heejun add `17.8.16
     number_of_current_contract = int(contract.get_contract_count(subject_code))
     if number_of_current_contract > 0 and subject.info[subject_code][
@@ -252,7 +258,7 @@ def is_it_OK(subject_code, current_price):
 
     if contract_cnt == 0: return false
 
-    subject.info[subject_code]['신규매매수량'] = contract_cnt
+    #subject.info[subject_code]['신규매매수량'] = contract_cnt
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
     subject.info[subject_code]['주문내용'] = order_contents
     log.debug('para.is_it_OK() : 모든 구매조건 통과.')
