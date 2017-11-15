@@ -122,9 +122,12 @@ def is_it_OK(subject_code, current_price):
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞','틀', '틀', '맞']:
-
-            log.info("맞틀틀맞 다음으로 매매 진입합니다.")
-            pass
+            if subject.info[subject_code]['수익리스트'][-1] > 10:
+                log.info("이전 플로우 수익이 10틱 이상으로 매매 진입 안합니다.")
+                return false
+            else:
+                log.info("맞틀틀맞 다음으로 매매 진입합니다.")
+                pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '맞']:
             log.info("틀틀틀맞 다음으로 매매 진입합니다.")
@@ -139,13 +142,13 @@ def is_it_OK(subject_code, current_price):
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
-
             if subject.info[subject_code]['수익리스트'][-2] > 70:
                 log.info("지지난 플로우가 70이상 수익으로 진입안합니다.")
                 return false
             else:
                 log.info("틀맞틀 다음으로 매매 진입합니다.")
                 pass
+            pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '맞'] and profit > reverse_tic:
             if mesu_medo_type == '신규매도':
@@ -156,10 +159,10 @@ def is_it_OK(subject_code, current_price):
             ma_line_is_true = True
             subject.info[subject_code]['반대매매'] = True
 
-
         else:
             log.info("맞틀 조건이 맞지 않아 매매 포기합니다.")
             return false
+
 
     else:
         if subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit < 0:
@@ -175,8 +178,13 @@ def is_it_OK(subject_code, current_price):
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
-            log.info("맞틀틀맞 다음으로 매매 진입합니다.")
-            pass
+
+            if profit > 10:
+                log.info("이전 플로우 수익이 10틱 이상으로 매매 진입 안합니다.")
+                return false
+            else:
+                log.info("맞틀틀맞 다음으로 매매 진입합니다.")
+                pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit > 0:
             log.info("틀틀틀맞 다음으로 매매 진입합니다.")
@@ -199,6 +207,8 @@ def is_it_OK(subject_code, current_price):
                 pass
 
 
+
+
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
             if mesu_medo_type == '신규매도':
                 mesu_medo_type = '신규매수'
@@ -213,13 +223,15 @@ def is_it_OK(subject_code, current_price):
             log.info("맞틀 조건이 맞지 않아 매매 포기합니다.")
             return false
 
+
+
     if ma_line_is_true == False: return false
 
     if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code][
         '반대매매'] == False:
         log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
         return false
-    elif get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
+    if get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
             subject.info[subject_code]['마감시간']):
         log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
         return false
@@ -233,7 +245,7 @@ def is_it_OK(subject_code, current_price):
         if contract.recent_trade_cnt == possible_contract_cnt:
             contract_cnt = possible_contract_cnt
         log.info("매매 예정 수량은 %s개 입니다." % contract_cnt)
-        if contract_cnt < 2:
+        if contract_cnt == 0:
             contract_cnt = 2
     else:
         contract_cnt = 2  # 테스트 돌릴때
