@@ -1,6 +1,7 @@
 ﻿# -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, auto_login, contract
+import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract
+import auto_login
 import define as d
 import json
 import math
@@ -14,6 +15,7 @@ from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
 import db
 import health_server
+
 kiwoom = None
 
 def get_instance():
@@ -88,8 +90,8 @@ class api():
                 print("연결 성공")
 
                 # auto login
-                self.login_thr = auto_login.Login()
-                self.login_thr.start()
+                login_thr = auto_login.Login()
+                login_thr.start()
 
                 # health server run
                 self.health_server_thread = health_server.HealthConnectManager()
@@ -259,7 +261,22 @@ class api():
         if rtn == -200:
             time.sleep(0.5)
             self.request_tick_info(subject_code, tick_unit, prevNext)
-        
+
+
+    def request_day_info(self, subject_code, prevNext):
+        print("request_day_info")
+        self.set_input_value("종목코드", subject_code)
+        self.set_input_value("조회일자", "")
+        rtn = self.comm_rq_data("해외선물옵션일차트조회","opc10003", prevNext, subject.info[subject_code]['화면번호'])
+
+        if rtn != 0:
+            # 에러코드별 로그
+            log.error(self.parse_error_code(rtn))
+
+        if rtn == -200:
+            time.sleep(0.5)
+            self.request_day_info(subject_code, prevNext)
+
 
     def set_input_value(self, sID, sValue):
         """
@@ -374,6 +391,36 @@ class api():
             log.info('예수금 현황 : ' + str(contract.my_deposit))
             return
 
+        if sRQName == "해외선물옵션일차트조회":
+            print("sRQName:해외선물옵션일차트조회")
+            datas = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
+            datas = datas.split()
+
+            subject_code = ""
+            for subject_code in subject.info.keys():
+                subject_code = subject_code
+
+            if subject_code not in calc.data_day:
+                calc.data_day[subject_code] = []
+            i = 0
+            while ( i < len(datas) ):
+                candle = {}
+                candle['현재가'] = datas[i]
+                candle['시가'] = datas[i+1]
+                candle['고가'] = datas[i+2]
+                candle['저가'] = datas[i+3]
+                candle['일자'] = datas[i+4]
+                candle['누적거래량'] = datas[i+5]
+                candle['영업일자'] = datas[i+6]
+
+                calc.data_day[subject_code].append(candle)
+                i = i + 7
+
+            calc.data_day[subject_code].reverse()
+            print(calc.data_day[subject_code])
+
+            pass
+
         if sRQName == "해외선물옵션틱그래프조회":
             for subject_code in subject.info.keys():
                 if sScrNo == subject.info[subject_code]['화면번호']:  
@@ -419,7 +466,6 @@ class api():
                                 self.current_candle[subject_code].append(float(self.candle_data[subject_code][5]))
                                 self.current_candle[subject_code].append(float(self.candle_data[subject_code][6]))
                                 log.debug('지난 데이터 수신 완료.')
-
                             else:
                                 log.debug('지난 데이터 수신 요청.')
                                 data = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
@@ -500,8 +546,13 @@ class api():
                     del subject.info[subject_symbol]
                     
                     # 초기 데이터 요청
-                    self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
-                    time.sleep(0.3)
+                    if subject.info[subject_code]['전략'] == '일봉매매':
+
+                        self.request_day_info(subject_code,"")
+                        time.sleep(0.3)
+                    else:
+                        self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
+                        time.sleep(0.3)
                         
             if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
                 self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
@@ -970,12 +1021,12 @@ class api():
             # 계좌번호 저장
             self.account = self.get_login_info("ACCNO")
             log.info("계좌번호 : " + self.account)
-            contract.account = self.account
-
+            
             if d.get_mode() == d.REAL:   
                 # 다이나믹 종목 정보 요청
                 self.get_dynamic_subject_code()
                 self.get_futures_deposit()
+                self.get_my_deposit_info()
 
                 # 종목 정보 로그 찍기
                 log.info("참여 종목 : %s" % subject.info.values())
@@ -1082,8 +1133,6 @@ class api():
             if subject.info[subject_code]['전략'] == '큰파라': subject.info[subject_code]['상태'] = '매매완료'
 
             subject.info[subject_code]['이상신호'] = False
-                
-        
 
     def set_jango_from_db(self):
         for subject_code in subject.info.keys(): 
@@ -1135,3 +1184,4 @@ class api():
         
     def delete_jango_to_db(self,subject_code): 
         self.jango_db.delete_db_contract(subject_code)
+            

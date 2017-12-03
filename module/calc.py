@@ -8,6 +8,8 @@ data = {}
 data['이동평균선'] = {}
 data['이동평균선']['일수'] = [45, 60, 150, 160]
 
+data_day = {}
+
 def create_data(subject_code):
     data[subject_code] = {}
     
