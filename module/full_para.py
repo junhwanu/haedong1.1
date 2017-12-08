@@ -108,6 +108,13 @@ def is_it_OK(subject_code, current_price):
     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
             calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
 
+        if subject.info[subject_code]['맞틀리스트'][-2] == '맞' and subject.info[subject_code]['맞틀리스트'][-1] == '틀':
+            if subject.info[subject_code]['수익리스트'][-2] > 70:
+                log.info("지지난 플로우가 70이상 수익으로 진입안합니다.")
+                return false
+            else:
+                pass
+
         if subject.info[subject_code]['맞틀리스트'][-4:] == ['틀','틀', '틀', '틀']:
             log.info("틀틀틀틀 다음으로 매매 진입합니다.")
             pass
@@ -141,6 +148,10 @@ def is_it_OK(subject_code, current_price):
             log.info("틀틀맞맞 다음으로 매매 진입합니다.")
             pass
 
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '틀', '틀']:
+            log.info("맞맞틀틀 다음으로 매매 진입합니다.")
+            pass
+
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
 
             if subject.info[subject_code]['수익리스트'][-2] > 70:
@@ -165,6 +176,15 @@ def is_it_OK(subject_code, current_price):
             return false
 
     else:
+
+        if subject.info[subject_code]['맞틀리스트'][-1] == '맞' and profit < 0:
+            if subject.info[subject_code]['수익리스트'][-1] > 70:
+                log.info("지지난 플로우가 70이상 수익으로 진입안합니다.")
+                return false
+            else:
+                pass
+
+
         if subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit < 0:
             log.info("틀틀틀틀 다음으로 매매 진입합니다.")
             pass
@@ -178,7 +198,6 @@ def is_it_OK(subject_code, current_price):
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
-
             if profit > 10:
                 log.info("이전 플로우 수익이 10틱 이상으로 매매 진입 안합니다.")
                 return false
@@ -196,6 +215,10 @@ def is_it_OK(subject_code, current_price):
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '맞'] and profit > 0:
             log.info("틀틀맞맞 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞','맞', '틀'] and profit < 0:
+            log.info("맞맞틀틀 다음으로 매매 진입합니다.")
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
@@ -223,10 +246,13 @@ def is_it_OK(subject_code, current_price):
 
     if ma_line_is_true == False: return false
 
+
+    #썸머타임 일때
     if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code][
         '반대매매'] == False:
         log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
         return false
+
     elif get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
             subject.info[subject_code]['마감시간']):
         log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
@@ -243,14 +269,16 @@ def is_it_OK(subject_code, current_price):
         log.info("매매 예정 수량은 %s개 입니다." % contract_cnt)
         if contract_cnt == 0:
             contract_cnt = 2
+        #
+        contract_cnt = 1
+
     else:
         contract_cnt = 2  # 테스트 돌릴때
 
-    # heejun add `17.11.15
     if contract_cnt > 1:
         subject.info[subject_code]['신규매매수량'] = contract_cnt
     elif contract_cnt == 1:
-        subject.info[subject_code]['신규매매수량'] = 2 #1계약만 살수 있을 때 신규매매수량이 1이면 1차 청산 되어버려 2로 고정
+        subject.info[subject_code]['신규매매수량'] = 2
 
     # heejun add `17.8.16
     number_of_current_contract = int(contract.get_contract_count(subject_code))
@@ -263,14 +291,17 @@ def is_it_OK(subject_code, current_price):
 
     log.debug("종목코드(" + subject_code + ") 신규 매매 계약 수 " + str(contract_cnt))
 
+    ######
+    #contract_cnt = 0
     if contract_cnt == 0: return false
 
-    #subject.info[subject_code]['신규매매수량'] = contract_cnt
+
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
     subject.info[subject_code]['주문내용'] = order_contents
     log.debug('para.is_it_OK() : 모든 구매조건 통과.')
     log.debug(order_contents)
     return order_contents
+
 
 
 def is_it_sell(subject_code, current_price):
@@ -303,12 +334,10 @@ def is_it_sell(subject_code, current_price):
                                       contract.DRIBBLE]}
 
                 elif current_price <= float(contract.list[subject_code]['체결가']) - (subject.info[subject_code]['리버스손절틱'] * subject.info[subject_code]['단위']):
-                    #풀파라 혹은 반대매매 에서 매매가의 50틱 손절
-                    res.info(str(subject.info[subject_code]['리버스손절틱'])+ "틱 손절가가 되어 " + str(contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]) + "개 청산 요청.")
+                    res.info("반대매매 리버스 손절가가 되어 " + str(contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]) + "개 청산 요청.")
                     return {'신규주문': True, '매도수구분': '신규매도',
                             '수량': contract.list[subject_code]['계약타입'][contract.SAFE] +
                                   contract.list[subject_code]['계약타입'][contract.DRIBBLE]}
-
 
                 elif current_price <= contract.list[subject_code]['손절가']:
 
@@ -369,9 +398,6 @@ def is_it_sell(subject_code, current_price):
                                                                              subject.info[subject_code]['단위']
                         res.info("2차 청산 드리블 중 %s" % contract.list[subject_code]['손절가'])
                         # return {'신규주문':True, '매도수구분':'신규매도', '수량':int((contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]+1)/2)}
-
-
-
             elif contract.list[subject_code]['매도수구분'] == '신규매도':
                 # 매도일때
                 if calc.data[subject_code]['현재플로우최극가'] + (
@@ -385,7 +411,7 @@ def is_it_sell(subject_code, current_price):
                                       contract.DRIBBLE]}
 
                 elif current_price >= float(contract.list[subject_code]['체결가']) + (subject.info[subject_code]['리버스손절틱'] * subject.info[subject_code]['단위']):
-                    res.info(str(subject.info[subject_code]['리버스손절틱'])+ "틱 손절가가 되어 " + str(contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]) + "개 청산 요청.")
+                    res.info("반대매매 리버스 손절가가 되어 " + str(contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]) + "개 청산 요청.")
                     return {'신규주문': True, '매도수구분': '신규매수',
                             '수량': contract.list[subject_code]['계약타입'][contract.SAFE] +
                                   contract.list[subject_code]['계약타입'][contract.DRIBBLE]}
@@ -404,7 +430,7 @@ def is_it_sell(subject_code, current_price):
                         res.info("손절가가 되어 " + str(contract_num) + "개 청산 요청.")
                         return {'신규주문': True, '매도수구분': '신규매수', '수량': contract_num}
                     else:
-                        #1차 청산 이후 청산 일 때t
+                        #1차 청산 이후 청산 일 때
                         res.info("손절가가 되어 " + str(contract.list[subject_code]['계약타입'][contract.SAFE] +
                                                   contract.list[subject_code]['계약타입'][
                                                       contract.DRIBBLE]) + "개 청산 요청.")
