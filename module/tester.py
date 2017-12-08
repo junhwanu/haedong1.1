@@ -1,4 +1,4 @@
-﻿# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 import kiwoom, log, contract, subject, calc, time, pymysql, subject
 import log_result as res
 
@@ -13,7 +13,7 @@ def init():
 
     start_date = input()
     #end_date = get_yesterday()
-    end_date = '20171001'
+    end_date = '20171002'
     #end_date = str(int(start_date) + 1)
     print('종목코드를 입력하세요. (ex. CL)')
     subject_code = input()
@@ -22,14 +22,15 @@ def init():
     #print(subject.info[subject_code])
     kw = kiwoom.api(2)
 
-    connect()
+    connect(subject_code)
 
     not_exist_table_count = 0
     for date in range( int(start_date), int(end_date) ):
         tick_cnt = 0
         candle_cnt = 0
-        table_name = subject_code  +'_'+ str(date)
-        if exist_table(table_name) == False:
+        #table_name = subject_code  +'_'+ str(date)
+        table_name = subject_code
+        if exist_table(table_name, subject_code) == False:
             log.info('테이블이 없음.')
             if date % 100 <= 31: not_exist_table_count+=1
             if not_exist_table_count > 10: break
@@ -52,7 +53,8 @@ def init():
             if tick != None: # tick 정보가 있으면
                 candle['현재가'] = float(tick[1])
                 candle['거래량'] += int(tick[2])
-                candle['체결시간'] = tick[0]
+                #candle['체결시간'] = tick[0]
+                candle['체결시간'] = tick[0].strftime('%Y%m%d%H%M%S')
                 candle['영업일자'] = tick[3]
                 
                 if tick_cnt == 0:
@@ -79,6 +81,7 @@ def init():
             else:
                 print(str(date) + ' 테스트 종료.')
                 break 
+        break
     disconnect()
 
 def setTick(tick):
@@ -126,10 +129,13 @@ def send_order(contract_type, subject_code, contract_cnt, order_type):
 def get_yesterday():
     return time.localtime().tm_year * 10000 + time.localtime().tm_mon * 100 + time.localtime().tm_mday
 
-def connect():
+def connect(subject_code):
     global curs
     global conn
-    conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong', charset='utf8')
+    if subject_code == 'GCJ17' or subject_code == 'GCM17' or subject_code == 'GCQ17':
+        conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong', charset='utf8')
+    else:
+        conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong4', charset='utf8')
     curs = conn.cursor()
 
 def disconnect():
@@ -151,13 +157,16 @@ def read_tick(table_name):
     
     return row
 
-def exist_table(table_name):
+def exist_table(table_name, subject_code):
     global curs
     global conn
     temp = []
     #conn = pymysql.connect(host='211.253.28.132', user='root', password='goehddl', db='test_db1', charset='utf8')
     #curs = conn.cursor()
-    query = "show tables in haedong like '%s'"%table_name
+    if subject_code == 'GCJ17' or subject_code == 'GCM17' or subject_code == 'GCQ17':
+        query = "show tables in haedong like '%s'"%table_name
+    else:
+        query = "show tables in haedong4 like '%s'" % table_name
     curs.execute(query)
     conn.commit()
     
