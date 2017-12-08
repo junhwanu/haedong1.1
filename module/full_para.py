@@ -278,7 +278,7 @@ def is_it_OK(subject_code, current_price):
     if contract_cnt > 1:
         subject.info[subject_code]['신규매매수량'] = contract_cnt
     elif contract_cnt == 1:
-        subject.info[subject_code]['신규매매수량'] = 2
+        subject.info[subject_code]['신규매매수량'] = 2 #1계약만 살수 있을 때 신규매매수량이 1이면 1차 청산 되어버려 2로 고정
 
     # heejun add `17.8.16
     number_of_current_contract = int(contract.get_contract_count(subject_code))
