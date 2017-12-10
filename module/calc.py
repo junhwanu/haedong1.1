@@ -6,10 +6,12 @@ import math
 
 data = {}
 data['이동평균선'] = {}
+#우리가 사용할 이동평균선의 일자를 설정
 data['이동평균선']['일수'] = [45, 60, 150, 160]
 
 data_day = {}
 
+#처음에 우리가 계산해야할 이평선 일목균형표 고가,저가,체결시간,sar,볼린저밴드 등을 처음에 초기화 해주는 부분
 def create_data(subject_code):
     data[subject_code] = {}
     

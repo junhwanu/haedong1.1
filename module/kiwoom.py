@@ -15,6 +15,7 @@ from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
 import db
 import health_server
+import ns
 
 kiwoom = None
 
@@ -393,44 +394,60 @@ class api():
 
         if sRQName == "해외선물옵션일차트조회":
             print("sRQName:해외선물옵션일차트조회")
-            datas = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
-            datas = datas.split()
-
-            subject_code = ""
+            #for문의 이유는 미래의 여러종목일때 그때 종목마다 일차트를 그리기 위해서 존재 nyny
             for subject_code in subject.info.keys():
-                subject_code = subject_code
-
-            if subject_code not in calc.data_day:
-                calc.data_day[subject_code] = []
-            i = 0
-            while ( i < len(datas) ):
-                candle = {}
-                candle['현재가'] = datas[i]
-                candle['시가'] = datas[i+1]
-                candle['고가'] = datas[i+2]
-                candle['저가'] = datas[i+3]
-                candle['일자'] = datas[i+4]
-                candle['누적거래량'] = datas[i+5]
-                candle['영업일자'] = datas[i+6]
-
-                calc.data_day[subject_code].append(candle)
-                i = i + 7
-
-            calc.data_day[subject_code].reverse()
-            print(calc.data_day[subject_code])
-
-            pass
-
-        if sRQName == "해외선물옵션틱그래프조회":
-            for subject_code in subject.info.keys():
-                if sScrNo == subject.info[subject_code]['화면번호']:  
+                #화면 번호는 hts 창같은 개념으로 창을 여러개 띄울때만 사용하는것~! 우리는 여러개 창을 띄워 보는게 아니니깐 그냥 종목별로 유니크한 번호 1개만 screen에 설정해주고 subject_code에 추가만 시켜주면됨~!
+                if sScrNo == subject.info[subject_code]['화면번호']:
                     if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
                         calc.create_data(subject_code)
                         self.recent_price_list[subject_code] = []
                         self.current_candle[subject_code] = []
 
                         if d.get_mode() == d.REAL:
-                            # 종목코드 데이터가 있는지 확인
+                            datas = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
+                            datas = datas.split()
+
+                            subject_code = ""
+                            for subject_code in subject.info.keys():
+                                subject_code = subject_code
+
+                            if subject_code not in calc.data_day:
+                                calc.data_day[subject_code] = []
+                            i = 0
+                            while ( i < len(datas) ):
+                                candle = {}
+                                candle['현재가'] = datas[i]
+                                candle['시가'] = datas[i+1]
+                                candle['고가'] = datas[i+2]
+                                candle['저가'] = datas[i+3]
+                                candle['일자'] = datas[i+4]
+                                candle['누적거래량'] = datas[i+5]
+                                candle['영업일자'] = datas[i+6]
+
+                                calc.data_day[subject_code].append(candle)
+                                i = i + 7
+
+                            calc.data_day[subject_code].reverse()
+                            print(calc.data_day[subject_code])
+
+                            pass
+
+        if sRQName == "해외선물옵션틱그래프조회":
+            # for문의 이유는 미래의 여러종목일때 그때 종목마다 틱차트를 그리기 위해서 존재 nyny
+            for subject_code in subject.info.keys():
+                # 화면 번호는 hts 창같은 개념으로 창을 여러개 띄울때만 사용하는것~! 우리는 여러개 창을 띄워 보는게 아니니깐 그냥 종목별로 유니크한 번호 1개만 screen에 설정해주고 subject_code에 추가만 시켜주면됨~!
+                if sScrNo == subject.info[subject_code]['화면번호']:
+                    # 틱INFO라서 처음에 틱정보를 요청하게 되면 calc에 계산해야 하는 data들을 만들고 price에 값정보들을 넣는 부분
+                    if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
+                        #처음 틱정보가 들어오면 우리가 원하는 고가,저가,sar, 볼린저밴드, 이평선, 일목균형표를 초기화함
+                        calc.create_data(subject_code)
+                        #종목별 이전 tick정보를 가져올때 실데이터가 들어올수있으니 그시간동안 들어온 실데이터를 저장하는 리스트
+                        self.recent_price_list[subject_code] = []
+                        #종목별 캔들리스트를 초기화함
+                        self.current_candle[subject_code] = []
+
+                        if d.get_mode() == d.REAL:
+                            # 종목코드 데이터가 있는지 확인 9000이 최소 캔들수~!
                             if subject_code in self.candle_data.keys() and len(self.candle_data[subject_code]) > 9000 * 7:
                                 data = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
                                 data = data.split()
@@ -505,6 +522,7 @@ class api():
                         self.adjusted_price[subject_code] = round( float( sum(self.recent_price_list[subject_code])) / max(len(self.recent_price_list[subject_code]), 1) , subject.info[subject_code]['자릿수'])
                         if d.get_mode() == d.REAL: return
 
+                    #틱INFO라서 처음에 600캔들 요청하고 나면 data가 만들어져 있으니 이후에 price에 추가
                     if d.get_mode() == d.REAL: # 실제투자
                         price['현재가'] = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRecordName, 1, '현재가')
                         price['저가'] = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRecordName, 1, '저가')
@@ -549,6 +567,11 @@ class api():
                     if subject.info[subject_code]['전략'] == '일봉매매':
 
                         self.request_day_info(subject_code,"")
+                        time.sleep(0.3)
+                    elif subject.info[subject_code]['전략'] == '남용T':
+                        self.request_day_info(subject_code, "")
+                        time.sleep(0.3)
+                        self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
                         time.sleep(0.3)
                     else:
                         self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
@@ -694,6 +717,7 @@ class api():
                         sell_contents = trend_band.is_it_sell(subject_code, current_price, self.adjusted_price[subject_code])
                     elif subject.info[subject_code]['전략'] == '큰파라':
                         sell_contents = big_para.is_it_sell(subject_code, current_price)
+                    #full_para가 이렇게 복잡한 이유는 반대매매(reverse) 때문에 이렇게 된다~!
                     elif subject.info[subject_code]['전략'] == '풀파라':
                         sell_contents = full_para.is_it_sell(subject_code, current_price)
                         if sell_contents['신규주문'] == True:
@@ -702,6 +726,8 @@ class api():
                                 if buy_contents['매도수구분'] != sell_contents['매도수구분']:
                                     sell_contents = buy_contents
                                     next_state = '매매시도중'
+                    elif subject.info[subject_code]['전략'] == '남용T':
+                        sell_contents = ns.is_it_sell(subject_code, current_price)
 
                     if sell_contents['신규주문'] == True:
                         res.info('주문 체결시간 : ' + str(current_time))
@@ -736,7 +762,9 @@ class api():
                 elif contract.get_contract_count(subject_code) == 0 and subject.info[subject_code]['상태'] != '매매시도중' and subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code]['상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
                 #elif subject.info[subject_code]['상태'] != '매매시도중' and subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code]['상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
                 #################
-                    
+
+                    #리얼 데이터로 실제 1틱씩 들어올때마다 타는 플로우~!nyny
+                    #contract.get_contract_count(subject_code) == 0 이게 계약수가 없을때만 살지 말지를 판단 해서 계약수가 있을때(1이상)일때는 안들어옴~!
                     order_contents = None
                     if subject.info[subject_code]['전략'] == '해동이':
                         order_contents = santa.is_it_OK(subject_code, current_price)
@@ -749,6 +777,9 @@ class api():
                         order_contents = big_para.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '풀파라':
                         order_contents = full_para.is_it_OK(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == '남용T':
+                        order_contents = ns.is_it_OK(subject_code, current_price)
+
                     else:
                         return
 

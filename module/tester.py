@@ -9,6 +9,7 @@ recent_price = {}
 
 def init():
     global kw
+    #지금은 의미 없음~! 월물별로 테스트하기 때문에~!
     print('테스트 시작일을 입력하세요. (ex. 20170129)')
 
     start_date = input()
@@ -25,6 +26,7 @@ def init():
     connect(subject_code)
 
     not_exist_table_count = 0
+    #지금은 필요없음 왜냐하면 월물별로 테스트 하기 때문에 여러 날짜를 가져올 필요가 없이 월물 1번만 가져와서 테스트하면됨~!nyny
     for date in range( int(start_date), int(end_date) ):
         tick_cnt = 0
         candle_cnt = 0
