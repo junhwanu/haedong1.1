@@ -441,7 +441,7 @@ class api():
                     if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
                         #처음 틱정보가 들어오면 우리가 원하는 고가,저가,sar, 볼린저밴드, 이평선, 일목균형표를 초기화함
                         calc.create_data(subject_code)
-                        #??NYNY recent_price_list이게 뭔지를 모르겠음
+                        #안씀
                         self.recent_price_list[subject_code] = []
                         #종목별 캔들리스트를 초기화함
                         self.current_candle[subject_code] = []
@@ -518,10 +518,13 @@ class api():
 
                             #calc.show_current_price(subject_code, self.recent_price[subject_code])
                         elif d.get_mode() == d.TEST:
+                            #이게 가능한 이유는 test에서 Tr데이터를 요청할때 candle을 파라미터로 넘김!
                             self.recent_price[subject_code] = candle['현재가']
                             self.recent_candle_time[subject_code] = candle['체결시간']
                         
+                        #안씀
                         for idx in range(0,10): self.recent_price_list[subject_code].append(self.recent_price[subject_code]) # 현재가 삽입
+                        #안씀
                         self.adjusted_price[subject_code] = round( float( sum(self.recent_price_list[subject_code])) / max(len(self.recent_price_list[subject_code]), 1) , subject.info[subject_code]['자릿수'])
                         if d.get_mode() == d.REAL: return
 
