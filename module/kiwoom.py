@@ -441,7 +441,7 @@ class api():
                     if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
                         #처음 틱정보가 들어오면 우리가 원하는 고가,저가,sar, 볼린저밴드, 이평선, 일목균형표를 초기화함
                         calc.create_data(subject_code)
-                        #종목별 이전 tick정보를 가져올때 실데이터가 들어올수있으니 그시간동안 들어온 실데이터를 저장하는 리스트
+                        #??NYNY recent_price_list이게 뭔지를 모르겠음
                         self.recent_price_list[subject_code] = []
                         #종목별 캔들리스트를 초기화함
                         self.current_candle[subject_code] = []
@@ -449,6 +449,8 @@ class api():
                         if d.get_mode() == d.REAL:
                             # 종목코드 데이터가 있는지 확인 9000이 최소 캔들수~!
                             if subject_code in self.candle_data.keys() and len(self.candle_data[subject_code]) > 9000 * 7:
+
+                                #수신된 전체데이터를 반환한다.(feat.키움open_api pdf)
                                 data = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
                                 data = data.split()
                                 self.candle_data[subject_code] = self.candle_data[subject_code] + data[1:]
@@ -500,7 +502,8 @@ class api():
                                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['저가'] = float(data[6])
                                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['체결시간'] = float(data[3])
                                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['거래량'] = float(data[2])
-                                    
+
+                                    # 종목별 이전 tick정보를 가져올때 실데이터가 들어올수있으니 그시간동안 들어온 실데이터를 저장하는 리스트
                                     self.temp_candle[subject_code] = []
                                     if subject.info[subject_code]['현재가변동횟수'] == subject.info[subject_code]['시간단위']:
                                         self.temp_candle.append(subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
