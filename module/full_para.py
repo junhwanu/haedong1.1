@@ -12,14 +12,18 @@ def is_it_OK(subject_code, current_price):
     global previous_profit
     global temp_index
     start_price = subject.info[subject_code]['시가']
+    #수익을 계산하기 위한 변수
     profit = 0
     profit_tick = subject.info[subject_code]['익절틱']
     sonjal_tick = subject.info[subject_code]['손절틱']
     mesu_medo_type = None
+    #매수or매도를 안할때 return하는 변수
     false = {'신규주문': False}
     ma_line_is_true = True
+    #파라와 반대로 들어가기 위해서 만든 변수
     reverse_tic = subject.info[subject_code]['반대매매틱']
 
+    #300캔들이 없으면 매매 안함
     if calc.data[subject_code]['idx'] < 300:
         return false
 
@@ -29,10 +33,16 @@ def is_it_OK(subject_code, current_price):
         return false
 
     # log.debug("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code]['flow'] + " / SAR : " + str(subject.info[subject_code]['sar']) + " / 추세 : " + my_util.is_sorted(subject_code))
+    #여기서 상향/하향계산은 2개로 나뉨 1. 캐들만들고 있을때~! 2. 캔들 완성시!!
+    #  calc를 통해서 calc.push -> calc를 통해 여러가지 계산을 하는데 이때 flow를 저장 즉, 실데이터가 딱 들어오면 바로 계산끝
     if subject.info[subject_code]['flow'] == '상향':
+        # 여기에 들어온건 상향일때 현재가격이 sar보다 작아져 하향반전을 이룰때
         if current_price < subject.info[subject_code]['sar']:
             log.debug("종목코드(" + subject_code + ") 하향 반전.")
+            #캔들완성이 아직 안됐는데 반전이 이뤄졌을때 profit계산(실데이터 들어오면 무조건 계산됨)
             profit = current_price - calc.data[subject_code]['이전반전시SAR값'][-1]
+            #캔들이 완성됐을때
+            #완성되버리면 SAR값이 calc.push -> calc->calculate_sar를 통해 최근값이 SAR값에 추가되버리니 계산을 다시해야함 그게 아래)
             if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
                     calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
                 profit = current_price - calc.data[subject_code]['이전반전시SAR값'][-2]
@@ -43,7 +53,7 @@ def is_it_OK(subject_code, current_price):
                 res.info("이동평균선이 맞지 않아 매수 포기합니다.")
                 ma_line_is_true = False
                 # return false
-
+        #하향으로 진행하던 플로가 상향으로 상향 반전될때! ex)리스트[-1]은 리스트의 가장 마지막 항목이다
         elif calc.data[subject_code]['플로우'][-2] == '하향':
             log.debug("종목코드(" + subject_code + ") 상향 반전.")
             profit = calc.data[subject_code]['이전반전시SAR값'][-1] - current_price
