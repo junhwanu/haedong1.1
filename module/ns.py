@@ -13,8 +13,13 @@ def is_it_OK(subject_code, current_price):
     #order_contents여기서 신규 주문이 True면 레알 사고팔고 false면 안삼~!
     false = {'신규주문': False}
     #안살꺼면
-    return false
+    #return false
+    profit_tick = subject.info[subject_code]['익절틱']
+    sonjal_tick = subject.info[subject_code]['손절틱']
+    mesu_medo_type = None
+    contract_cnt=2
 
+    log.debug('aaaaaaaaa')
     # 레알 사는거면 mesu_medo_type가 신규매수 or 신규매도 여야지만 됨!
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
     subject.info[subject_code]['주문내용'] = order_contents
