@@ -18,13 +18,16 @@ def is_it_OK(subject_code, current_price):
     sonjal_tick = subject.info[subject_code]['손절틱']
     mesu_medo_type = None
     contract_cnt=2
+    amount = calc.amount
 
-    log.debug('aaaaaaaaa')
+    res.info(amount)
     # 레알 사는거면 mesu_medo_type가 신규매수 or 신규매도 여야지만 됨!
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
+    #아직 이건없듬!
+    log.info(subject.info[subject_code]['현재캔들'])
     subject.info[subject_code]['주문내용'] = order_contents
-    log.debug('para.is_it_OK() : 모든 구매조건 통과.')
-    log.debug(order_contents)
+    log.info('para.is_it_OK() : 모든 구매조건 통과.')
+    log.info(order_contents)
     return order_contents
 
 
