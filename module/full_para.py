@@ -575,6 +575,6 @@ def get_time(add_min, subject_code):
 
         current_time = current_hour * 100 + current_min
 
-        current_time = int(str(calc.data[subject_code]['체결시간'][-1])[8:12])
+        #current_time = int(str(calc.data[subject_code]['체결시간'][-1])[8:12])
 
     return current_time
