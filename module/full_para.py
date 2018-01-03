@@ -566,6 +566,7 @@ def get_time(add_min, subject_code):
         current_time = current_hour * 100 + current_min
 
     elif d.get_mode() == d.TEST:  # 테스트
+        '''
         current_hour = int(str(calc.data[subject_code]['체결시간'][-1])[8:10])
         current_min = int(str(calc.data[subject_code]['체결시간'][-1])[10:12])
         current_min += add_min
@@ -574,7 +575,7 @@ def get_time(add_min, subject_code):
             current_min -= 60
 
         current_time = current_hour * 100 + current_min
-
-        #current_time = int(str(calc.data[subject_code]['체결시간'][-1])[8:12])
+        '''
+        current_time = int(str(calc.data[subject_code]['체결시간'][-1])[8:12])
 
     return current_time
