@@ -77,8 +77,9 @@ def init():
                     tick_cnt = 0
                     candle_cnt += 1
                     #res.info(str(candle))
-                    kw.OnReceiveTrData(subject.info[subject_code]['화면번호'], '해외선물옵션틱그래프조회', None, None, None, candle) 
-                    candle = {'현재가':0, '거래량':0, '체결시간':0, '시가':0, '고가':0, '저가':999999999, '영업일자':0}  
+                    kw.OnReceiveTrData(subject.info[subject_code]['화면번호'], '해외선물옵션틱그래프조회', None, None, None, candle)
+                    #log.info("캔들 추가, %s" % candle)
+                    candle = {'현재가':0, '거래량':0, '체결시간':0, '시가':0, '고가':0, '저가':999999999, '영업일자':0}
                     #input()
             else:
                 print(str(date) + ' 테스트 종료.')
@@ -134,10 +135,8 @@ def get_yesterday():
 def connect(subject_code):
     global curs
     global conn
-    if subject_code == 'GCJ17' or subject_code == 'GCM17' or subject_code == 'GCQ17':
-        conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong', charset='utf8')
-    else:
-        conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong4', charset='utf8')
+
+    conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db='haedong4', charset='utf8')
     curs = conn.cursor()
 
 def disconnect():
@@ -165,10 +164,8 @@ def exist_table(table_name, subject_code):
     temp = []
     #conn = pymysql.connect(host='211.253.28.132', user='root', password='goehddl', db='test_db1', charset='utf8')
     #curs = conn.cursor()
-    if subject_code == 'GCJ17' or subject_code == 'GCM17' or subject_code == 'GCQ17':
-        query = "show tables in haedong like '%s'"%table_name
-    else:
-        query = "show tables in haedong4 like '%s'" % table_name
+    query = "show tables in haedong4 like '%s'" % table_name
+
     curs.execute(query)
     conn.commit()
     

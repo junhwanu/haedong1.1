@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract
+import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred
 import auto_login
 import define as d
 import json
@@ -732,6 +732,8 @@ class api():
                                 if buy_contents['매도수구분'] != sell_contents['매도수구분']:
                                     sell_contents = buy_contents
                                     next_state = '매매시도중'
+                    elif subject.info[subject_code]['전략'] == 'MA30100':
+                        sell_contents = mathirtyhundred.is_it_sell(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '남용T':
                         sell_contents = ns.is_it_sell(subject_code, current_price)
 
@@ -783,6 +785,8 @@ class api():
                         order_contents = big_para.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '풀파라':
                         order_contents = full_para.is_it_OK(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == 'MA30100':
+                        order_contents = mathirtyhundred.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '남용T':
                         order_contents = ns.is_it_OK(subject_code, current_price)
 
@@ -992,7 +996,7 @@ class api():
                             else:
                                 log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code]['상태'] + ' -> 중립대기.')
                                 subject.info[subject_code]['상태'] = '중립대기'
-                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라':
+                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라' or subject.info[subject_code]['전략'] == 'MA30100':
                             if contract.get_contract_count(subject_code) > 0:
                                 if subject.info[subject_code]['청산내용']['수량'] > 0:
                                     log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code]['상태'] + ' -> 청산시도중.')

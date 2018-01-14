@@ -7,7 +7,7 @@ import math
 data = {}
 data['이동평균선'] = {}
 #우리가 사용할 이동평균선의 일자를 설정
-data['이동평균선']['일수'] = [45, 60, 150, 160]
+data['이동평균선']['일수'] = [30, 45, 60, 100, 150, 160]
 
 data_day = {}
 
@@ -237,6 +237,8 @@ def calc(subject_code):
             init_sar(subject_code)
         elif data[subject_code]['idx'] > 5:
             calculate_sar(subject_code)
+    else:
+        calc_ma_line(subject_code)
 
 
 
