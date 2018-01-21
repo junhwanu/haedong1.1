@@ -245,7 +245,7 @@ def calc(subject_code):
         calc_ilmok_chart(subject_code)
         calc_linear_regression(subject_code)
 
-    elif subject.info[subject_code]['전략'] == '풀파라':
+    elif subject.info[subject_code]['전략'] == '풀파라' or subject.info[subject_code]['전략'] == '리버스온리':
 
         sar = subject.info[subject_code]['sar']
        

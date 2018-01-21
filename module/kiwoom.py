@@ -1,6 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred
+import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, reverse_only
 import auto_login
 import define as d
 import json
@@ -368,7 +368,7 @@ class api():
 
             try:
                 subject_code = order_info['종목코드']
-                if subject.info[subject_code]['전략'] == "풀파라":
+                if subject.info[subject_code]['전략'] == "풀파라" or subject.info[subject_code]['전략'] == "리버스온리":
                     if (calc.data[subject_code]['플로우'][-1] == "상향" and order_contents['매도수구분'] == '신규매도') or (calc.data[subject_code]['플로우'][-1] == '하향' and order_contents['매도수구분'] == '신규매수'):
                         log.info("반대매매 True로 변경.")
                         subject.info[subject_code]['반대매매'] = True
@@ -737,6 +737,14 @@ class api():
                                 if buy_contents['매도수구분'] != sell_contents['매도수구분']:
                                     sell_contents = buy_contents
                                     next_state = '매매시도중'
+                    elif subject.info[subject_code]['전략'] == '리버스온리':
+                        sell_contents = reverse_only.is_it_sell(subject_code, current_price)
+                        if sell_contents['신규주문'] == True:
+                            buy_contents = reverse_only.is_it_OK(subject_code, current_price)
+                            if buy_contents['신규주문'] == True:
+                                if buy_contents['매도수구분'] != sell_contents['매도수구분']:
+                                    sell_contents = buy_contents
+                                    next_state = '매매시도중'
                     elif subject.info[subject_code]['전략'] == 'MA30100':
                         sell_contents = mathirtyhundred.is_it_sell(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '남용T':
@@ -790,6 +798,8 @@ class api():
                         order_contents = big_para.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '풀파라':
                         order_contents = full_para.is_it_OK(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == '리버스온리':
+                        order_contents = reverse_only.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == 'MA30100':
                         order_contents = mathirtyhundred.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '남용T':
@@ -1001,7 +1011,7 @@ class api():
                             else:
                                 log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code]['상태'] + ' -> 중립대기.')
                                 subject.info[subject_code]['상태'] = '중립대기'
-                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라' or subject.info[subject_code]['전략'] == 'MA30100':
+                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라' or subject.info[subject_code]['전략'] == '리버스온리' or subject.info[subject_code]['전략'] == 'MA30100':
                             if contract.get_contract_count(subject_code) > 0:
                                 if subject.info[subject_code]['청산내용']['수량'] > 0:
                                     log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code]['상태'] + ' -> 청산시도중.')
