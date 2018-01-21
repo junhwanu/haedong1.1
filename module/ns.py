@@ -18,9 +18,8 @@ def is_it_OK(subject_code, current_price):
     sonjal_tick = subject.info[subject_code]['손절틱']
     mesu_medo_type = None
     contract_cnt=2
-    amount = calc.amount
 
-    res.info(amount)
+    # print(calc.data_day)
     # 레알 사는거면 mesu_medo_type가 신규매수 or 신규매도 여야지만 됨!
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
     #아직 이건없듬!

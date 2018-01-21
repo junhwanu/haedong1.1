@@ -399,7 +399,7 @@ class api():
                 #화면 번호는 hts 창같은 개념으로 창을 여러개 띄울때만 사용하는것~! 우리는 여러개 창을 띄워 보는게 아니니깐 그냥 종목별로 유니크한 번호 1개만 screen에 설정해주고 subject_code에 추가만 시켜주면됨~!
                 if sScrNo == subject.info[subject_code]['화면번호']:
                     if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
-                        calc.create_data(subject_code)
+                        calc.create_d_data(subject_code)
                         self.recent_price_list[subject_code] = []
                         self.current_candle[subject_code] = []
 
@@ -415,22 +415,27 @@ class api():
                                 calc.data_day[subject_code] = []
                             i = 0
                             while ( i < len(datas) ):
-                                candle = {}
-                                candle['현재가'] = datas[i]
-                                candle['시가'] = datas[i+1]
-                                candle['고가'] = datas[i+2]
-                                candle['저가'] = datas[i+3]
-                                candle['일자'] = datas[i+4]
-                                candle['누적거래량'] = datas[i+5]
-                                candle['영업일자'] = datas[i+6]
+                                d_candle = {}
+                                #일봉에서는 현재가가 종가가됨
+                                d_candle['현재가'] = datas[i]
+                                d_candle['시가'] = datas[i+1]
+                                d_candle['고가'] = datas[i+2]
+                                d_candle['저가'] = datas[i+3]
+                                d_candle['일자'] = datas[i+4]
+                                d_candle['누적거래량'] = datas[i+5]
+                                d_candle['영업일자'] = datas[i+6]
 
-                                calc.data_day[subject_code].append(candle)
+                                calc.data_day[subject_code].append(d_candle)
                                 i = i + 7
 
                             calc.data_day[subject_code].reverse()
-                            print(calc.data_day[subject_code])
-
                             pass
+                        elif d.get_mode() == d.TEST:
+                            # 이게 가능한 이유는 test에서 Tr데이터를 요청할때 candle을 파라미터로 넘김!
+                            self.recent_price[subject_code] = d_candle['현재가']
+                            self.recent_candle_time[subject_code] = d_candle['체결시간']
+                            price = d_candle
+                            print(price)
 
         if sRQName == "해외선물옵션틱그래프조회":
             # for문의 이유는 미래의 여러종목일때 그때 종목마다 틱차트를 그리기 위해서 존재 nyny
@@ -575,8 +580,8 @@ class api():
                         self.request_day_info(subject_code,"")
                         time.sleep(0.3)
                     elif subject.info[subject_code]['전략'] == '남용T':
-                        self.request_day_info(subject_code, "")
-                        time.sleep(0.3)
+                        # self.request_day_info(subject_code, "")
+                        # time.sleep(0.3)
                         self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
                         time.sleep(0.3)
                     else:

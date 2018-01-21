@@ -10,6 +10,9 @@ data['이동평균선'] = {}
 data['이동평균선']['일수'] = [30, 45, 60, 100, 150, 160]
 
 data_day = {}
+data_day['이동평균선'] = {}
+#우리가 사용할 이동평균선의 일자를 설정
+data_day['이동평균선']['일수'] = [30, 45, 60, 100, 150, 160]
 
 #처음에 우리가 계산해야할 이평선 일목균형표 고가,저가,체결시간,sar,볼린저밴드 등을 처음에 초기화 해주는 부분
 def create_data(subject_code):
@@ -82,6 +85,78 @@ def create_data(subject_code):
 
     #chart.create_figure(subject_code)
     #if d.get_mode() is d.REAL: chart.create_figure(subject_code)
+
+
+def create_d_data(subject_code):
+    data_day[subject_code] = {}
+
+    data_day[subject_code]['idx'] = -1
+    data_day[subject_code]['이동평균선'] = {}
+    data_day[subject_code]['지수이동평균선'] = {}
+
+    # Add
+    data_day[subject_code]['이전반전시SAR값'] = [0]
+
+    for days in data_day['이동평균선']['일수']:
+        data_day[subject_code]['이동평균선'][days] = []
+        data_day[subject_code]['지수이동평균선'][days] = []
+
+    data_day[subject_code]['일목균형표'] = {}
+    data_day[subject_code]['일목균형표']['전환선'] = []
+    data_day[subject_code]['일목균형표']['기준선'] = []
+    data_day[subject_code]['일목균형표']['선행스팬1'] = []
+    data_day[subject_code]['일목균형표']['선행스팬2'] = []
+    for index in range(0, 26):
+        data_day[subject_code]['일목균형표']['선행스팬1'].append(None)
+        data_day[subject_code]['일목균형표']['선행스팬2'].append(None)
+
+    data_day[subject_code]['현재가'] = []
+    data_day[subject_code]['시가'] = []
+    data_day[subject_code]['고가'] = []
+    data_day[subject_code]['저가'] = []
+    data_day[subject_code]['체결시간'] = []
+    data_day[subject_code]['캔들'] = []
+    data_day[subject_code]['SAR반전시간'] = []
+    data_day[subject_code]['매매가능가'] = 0
+
+    data_day[subject_code]['정배열연속틱'] = 1
+    data_day[subject_code]['추세연속틱'] = 1
+    data_day[subject_code]['추세'] = []
+    data_day[subject_code]['추세선'] = []
+    data_day[subject_code]['추세선밴드'] = {}
+    data_day[subject_code]['추세선밴드']['상한선'] = []
+    data_day[subject_code]['추세선밴드']['하한선'] = []
+    data_day[subject_code]['극점가'] = 0
+    data_day[subject_code]['현재플로우최극가'] = 0
+
+    for index in range(0, 26):
+        data_day[subject_code]['추세선'].append(None)
+        data_day[subject_code]['추세선밴드']['상한선'].append(None)
+        data_day[subject_code]['추세선밴드']['하한선'].append(None)
+
+    data_day[subject_code]['매매선'] = []
+    data_day[subject_code]['결정계수'] = 0
+    data_day[subject_code]['그래프'] = {}
+    data_day[subject_code]['추세선기울기'] = 0
+    data_day[subject_code]['표준편차'] = 0
+
+    data_day[subject_code]['볼린저밴드'] = {}
+    data_day[subject_code]['볼린저밴드']['중심선'] = []
+    data_day[subject_code]['볼린저밴드']['상한선'] = []
+    data_day[subject_code]['볼린저밴드']['하한선'] = []
+    data_day[subject_code]['볼린저밴드']['캔들위치'] = []
+    data_day[subject_code]['고가그룹'] = []
+    data_day[subject_code]['저가그룹'] = []
+    data_day[subject_code]['고저점검색완료'] = False
+
+    data_day[subject_code]['매수'] = []
+    data_day[subject_code]['매도'] = []
+
+    data_day[subject_code]['플로우'] = []
+    data_day[subject_code]['SAR'] = []
+
+    # chart.create_figure(subject_code)
+    # if d.get_mode() is d.REAL: chart.create_figure(subject_code)
 
 def is_sorted(subject_code, lst):
     '''
