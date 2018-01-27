@@ -12,9 +12,10 @@ def init():
     #지금은 의미 없음~! 월물별로 테스트하기 때문에~!
     print('테스트 시작일을 입력하세요. (ex. 20170129)')
 
-    start_date = input()
+    #start_date = input()
     #end_date = get_yesterday()
-    end_date = '20171002'
+    start_date = '20171101'
+    end_date = '20171102'
     #end_date = str(int(start_date) + 1)
     print('종목코드를 입력하세요. (ex. CL)')
     subject_code = input()
@@ -57,7 +58,7 @@ def init():
                 candle['거래량'] += int(tick[2])
                 #candle['체결시간'] = tick[0]
                 candle['체결시간'] = tick[0].strftime('%Y%m%d%H%M%S')
-                candle['영업일자'] = tick[3]
+                candle['영업일자'] = tick[3].strftime('%Y%m%d')
                 
                 if tick_cnt == 0:
                     candle['시가'] = float(tick[1])
