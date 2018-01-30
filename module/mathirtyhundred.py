@@ -9,7 +9,7 @@ def is_it_OK(subject_code, current_price):
     sonjal_tick = 10
     contract_cnt = 2
     mesu_medo_type = None
-    min_y_prime = 0.2
+    min_y_prime = 0.03
 
     false = {'신규주문': False}
 
@@ -25,7 +25,7 @@ def is_it_OK(subject_code, current_price):
         log.debug('신규 주문 가능상태가 아니므로 매매 불가. 상태 : ' + subject.info[subject_code]['상태'])
         return false
 
-    dx = 150
+    dx = 30
     dy = (calc.data[subject_code]['이동평균선'][100][-1] - calc.data[subject_code]['이동평균선'][100][-dx]) / subject.info[subject_code]['단위']
 
     if dy > 0: mesu_medo_type = '신규매수'
@@ -35,7 +35,7 @@ def is_it_OK(subject_code, current_price):
 
     if not (y_prime > min_y_prime and ((mesu_medo_type == '신규매수' and calc.data[subject_code]['이동평균선'][100][-1] > calc.data[subject_code]['이동평균선'][100][-(int(dx/2))] > calc.data[subject_code]['이동평균선'][100][-dx]) or (mesu_medo_type == '신규매도' and calc.data[subject_code]['이동평균선'][100][-1] < calc.data[subject_code]['이동평균선'][100][-(int(dx/2))] < calc.data[subject_code]['이동평균선'][100][-dx]))):
         '''
-        기울기 50틱 / 150캔들 이하면 매매 안함
+        기울기 와 dx 캔들 이하면 매매 안함
         구간 중간에 기울기가 나란히 정렬되어 있지 않으면 매매 안함
         '''
         return false
@@ -51,6 +51,7 @@ def is_it_OK(subject_code, current_price):
         30, 100MA가 매도수구분과 정렬되지 않을 경우 매매 안함
         '''
         return false
+
 
     order_contents = {'신규주문': True, '매도수구분': mesu_medo_type, '익절틱': profit_tick, '손절틱': sonjal_tick, '수량': contract_cnt}
     subject.info[subject_code]['주문내용'] = order_contents
@@ -68,8 +69,9 @@ def is_it_sell(subject_code, current_price):
         if contract.get_contract_count(subject_code) > 0:
             # 계약 보유중
             if contract.list[subject_code]['매도수구분'] == '신규매수':
-                if current_price - subject.info[subject_code]['손절틱'] * subject.info[subject_code]['단위'] > contract.list[subject_code]['손절가']:
-                    contract.list[subject_code]['손절가'] = current_price - subject.info[subject_code]['손절틱'] * subject.info[subject_code]['단위']
+                #현재가격이 100ma보다 크면
+                if current_price > calc.data[subject_code]['이동평균선'][100][-1]-1.5:
+                    contract.list[subject_code]['손절가'] = calc.data[subject_code]['이동평균선'][100][-1]-1.5
 
                 if current_price <= contract.list[subject_code]['손절가']:
                     log.info("매수간 손절가가 되어 청산 요청. (현재가 : %s, 체결가 : %s, 익절가 : %s, 손절가 : %s)" % (current_price, contract.list[subject_code]['체결가'], contract.list[subject_code]['익절가'], contract.list[subject_code]['손절가']))
@@ -80,13 +82,13 @@ def is_it_sell(subject_code, current_price):
                     contract.list[subject_code]['익절가'] = 9999
                     sell_contents = {'신규주문': True, '매도수구분': '신규매도', '수량': int(contract.get_contract_count(subject_code)/2)}
 
-                elif current_price <= calc.data[subject_code]['이동평균선'][100][-1] and contract.list[subject_code]['체결가'] < calc.data[subject_code]['이동평균선'][100][-1]:
-                    log.info("현재가가 100MA에 닿아 청산 요청. (현재가 : %s, 체결가 : %s, 익절가 : %s, 손절가 : %s)" % (current_price, contract.list[subject_code]['체결가'], contract.list[subject_code]['익절가'], contract.list[subject_code]['손절가']))
+                elif current_price <= calc.data[subject_code]['이동평균선'][100][-1]-1.5 and contract.list[subject_code]['체결가'] < calc.data[subject_code]['이동평균선'][100][-1]:
+                    log.info("현재가가 100MA뚫고 +10틱되어 청산 요청. (현재가 : %s, 체결가 : %s, 익절가 : %s, 손절가 : %s)" % (current_price, contract.list[subject_code]['체결가'], contract.list[subject_code]['익절가'], contract.list[subject_code]['손절가']))
                     sell_contents = {'신규주문': True, '매도수구분': '신규매도', '수량': contract.get_contract_count(subject_code)}
 
             elif contract.list[subject_code]['매도수구분'] == '신규매도':
-                if current_price + subject.info[subject_code]['손절틱'] * subject.info[subject_code]['단위'] < contract.list[subject_code]['손절가']:
-                    contract.list[subject_code]['손절가'] = current_price + subject.info[subject_code]['손절틱'] * subject.info[subject_code]['단위']
+                if current_price < calc.data[subject_code]['이동평균선'][100][-1]+1.5:
+                    contract.list[subject_code]['손절가'] = calc.data[subject_code]['이동평균선'][100][-1]+1.5
 
                 if current_price >= contract.list[subject_code]['손절가']:
                     log.info("매도간 손절가가 되어 청산 요청. (현재가 : %s, 체결가 : %s, 익절가 : %s, 손절가 : %s)" % (current_price, contract.list[subject_code]['체결가'], contract.list[subject_code]['익절가'], contract.list[subject_code]['손절가']))
@@ -97,8 +99,8 @@ def is_it_sell(subject_code, current_price):
                     contract.list[subject_code]['익절가'] = -9999
                     sell_contents = {'신규주문': True, '매도수구분': '신규매수', '수량': int(contract.get_contract_count(subject_code)/2)}
 
-                elif current_price >= calc.data[subject_code]['이동평균선'][100][-1] and contract.list[subject_code]['체결가'] > calc.data[subject_code]['이동평균선'][100][-1]:
-                    log.info("현재가가 100MA에 닿아 청산 요청. (현재가 : %s, 체결가 : %s, 익절가 : %s, 손절가 : %s)" % (current_price, contract.list[subject_code]['체결가'], contract.list[subject_code]['익절가'], contract.list[subject_code]['손절가']))
+                elif current_price >= calc.data[subject_code]['이동평균선'][100][-1]+1.5 and contract.list[subject_code]['체결가'] > calc.data[subject_code]['이동평균선'][100][-1]:
+                    log.info("현재가가 100MA+10틱 넘어서 청산 요청. (현재가 : %s, 체결가 : %s, 익절가 : %s, 손절가 : %s)" % (current_price, contract.list[subject_code]['체결가'], contract.list[subject_code]['익절가'], contract.list[subject_code]['손절가']))
                     sell_contents = {'신규주문': True, '매도수구분': '신규매수', '수량': contract.get_contract_count(subject_code)}
 
     except Exception as err:
