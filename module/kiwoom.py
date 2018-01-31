@@ -354,8 +354,6 @@ class api():
 
             order_contents['익절틱'] = subject.info[order_info['종목코드']]['익절틱']
             order_contents['손절틱'] = subject.info[order_info['종목코드']]['손절틱']
-                                                 
-            contract.add_contract(order_info, order_contents)            
 
             try:
                 subject_code = order_info['종목코드']
@@ -365,7 +363,8 @@ class api():
                         subject.info[subject_code]['반대매매'] = True
             except Exception as err:
                 log.error(err)
-
+                
+            contract.add_contract(order_info, order_contents)            
             return
         
         elif sRQName == "상품별증거금조회":
