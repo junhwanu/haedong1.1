@@ -158,7 +158,7 @@ def is_it_OK(subject_code, current_price):
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '맞']:
-            if subject.info[subject_code]['수익리스트'][-1] <= 10:
+            if subject.info[subject_code]['수익리스트'][-3] < -10:
                 log.info("이전 플로우 수익이 10틱 이하로 매매 진입 안합니다.")
                 return false
             else:
@@ -253,7 +253,7 @@ def is_it_OK(subject_code, current_price):
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit > 0:
-            if profit <= 10:
+            if subject.info[subject_code]['수익리스트'][-2] < -10:
                 log.info("이전 플로우 수익이 10틱 이하로 매매 진입 안합니다.")
                 return false
             else:
