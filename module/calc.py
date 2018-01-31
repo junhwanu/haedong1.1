@@ -14,6 +14,25 @@ data_day['이동평균선'] = {}
 #우리가 사용할 이동평균선의 일자를 설정
 data_day['이동평균선']['일수'] = [30, 45, 60, 100, 150, 160]
 
+result = {}
+result['틀맞틀맞'] = 0
+result['맞맞맞맞'] = 0
+result['틀틀틀틀'] = 0
+result['틀맞맞틀'] = 0
+result['틀맞틀틀'] = 0
+result['맞맞틀맞'] = 0
+result['맞맞틀틀'] = 0
+result['맞틀틀틀'] = 0
+result['틀틀맞틀'] = 0
+result['틀맞맞맞'] = 0
+result['맞틀틀맞'] = 0
+result['맞틀맞맞'] = 0
+result['맞틀맞틀'] = 0
+result['틀틀틀맞'] = 0
+result['맞맞맞틀'] = 0
+result['틀틀맞맞'] = 0
+
+
 #처음에 우리가 계산해야할 이평선 일목균형표 고가,저가,체결시간,sar,볼린저밴드 등을 처음에 초기화 해주는 부분
 def create_data(subject_code):
     data[subject_code] = {}
@@ -746,13 +765,22 @@ def calculate_sar(subject_code):
                 profit_tic = (next_sar - data[subject_code]['이전반전시SAR값'][-2]) / subject.info[subject_code]['단위']
                 profit_tic = round(profit_tic,1)
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
+                
+                result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
+                result[result_arry] = result[result_arry] + profit_tic
+                
+                #log.info(result)
             else:
                 subject.info[subject_code]['맞틀리스트'].append('맞')
                 #print(subject.info[subject_code]['맞틀리스트'])
                 profit_tic = (next_sar - data[subject_code]['이전반전시SAR값'][-2])/subject.info[subject_code]['단위']
                 profit_tic = round(profit_tic, 1)
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
-
+                
+                result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
+                result[result_arry] = result[result_arry] + profit_tic
+                
+                #log.info(result)
 
             data[subject_code]['현재플로우최극가'] = float(data[subject_code]['저가'][-1])
                 
@@ -801,7 +829,10 @@ def calculate_sar(subject_code):
                 profit_tic = round(profit_tic, 1)
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
 
+                result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
+                result[result_arry] = result[result_arry] + profit_tic                
                 
+                #log.info(result)
             else:
 
                 profit_tic = (data[subject_code]['이전반전시SAR값'][-2] - next_sar) / subject.info[subject_code]['단위']
@@ -809,8 +840,11 @@ def calculate_sar(subject_code):
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
                 subject.info[subject_code]['맞틀리스트'].append('틀')
 
-                #res.info(subject.info[subject_code]['맞틀리스트'])
-
+                result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
+                result[result_arry] = result[result_arry] + profit_tic
+                
+                #log.info(result)
+                
             data[subject_code]['현재플로우최극가'] = float(data[subject_code]['고가'][-1])
             
             t_sar = {}
