@@ -1093,11 +1093,12 @@ class api():
                 pass
 
             try:
-                self.health_server_thread.server.shutdown()
+                #self.health_server_thread.server.shutdown()
                 self.health_server_thread.server.server_close()
-                print("헬스 체크서버 종료")
+                log.info("헬스 체크서버 종료")
             except Exception as err:
-                log.error(err);
+                log.error(err)
+                self.quit()
 
             self.quit()
 
