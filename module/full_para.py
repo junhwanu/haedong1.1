@@ -323,7 +323,7 @@ def is_it_OK(subject_code, current_price):
             log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
             return false
     else:
-        if subject == "GCG18":
+        if subject_code == "GCG18":
             if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False:
                 log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
                 return false
