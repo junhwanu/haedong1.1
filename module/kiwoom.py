@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, auto_login, contract
+import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, reverse_only
+import auto_login
 import define as d
 import json
 import math
@@ -14,6 +15,7 @@ from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
 import db
 import health_server
+import ns
 
 kiwoom = None
 
@@ -79,7 +81,6 @@ class api():
         """
         로그인 윈도우를 실행한다.
         로그인이 성공하거나 실패하는 경우 OnEventConnect 이벤트가 발생하고 이벤트의 인자 값으로 로그인 성공 여부를 알 수 있다.
-
         :return: 0 - 성공, 음수값은 실패
         """
 
@@ -93,8 +94,8 @@ class api():
                 login_thr.start()
 
                 # health server run
-                #self.health_server_thread = health_server.HealthConnectManager()
-                #self.health_server_thread.start()
+                self.health_server_thread = health_server.HealthConnectManager()
+                self.health_server_thread.start()
 
             else:
                 print("연결 실패")
@@ -104,7 +105,6 @@ class api():
     def get_login_info(self, sTag):
         """
         로그인한 사용자 정보를 반환한다.
-
         :param sTag: 사용자 정보 구분 TAG값
             “ACCOUNT_CNT” ? 전체 계좌 개수를 반환한다.
             "ACCNO" ? 전체 계좌를 반환한다. 계좌별 구분은 ‘;’이다.
@@ -169,13 +169,11 @@ class api():
         print(rtn)
 
     def send_order(self, contract_type, subject_code, contract_cnt):
-        log.info("send_order()")
         
         """
         주식 주문을 서버로 전송한다.
         신규매수:self.send_order("신규매수","0101",my_account_number,1,subject_code,1,now_current_price,"","2","")
            
-
         신규매도:
         매수청산:
        매도청산:self.send_order("신규매수","0101",my_account_number,2,subject_code,subject_info[subject_code]['보유수량'],now_current_price,"2","")
@@ -205,7 +203,6 @@ class api():
             -302     : 타인 계좌를 사용할 수 없습니다.
             -303     : 경고-주문수량 200개 초과
             -304     : 제한-주문수량 400개 초과
-
         """
         _contract_type = 0
         if contract_type == '신규매수':
@@ -222,7 +219,6 @@ class api():
             return 0
     '''
     def request_tick_info(self, subject_code, tick_unit, prevNext):
-
         self.set_input_value("종목코드", subject_code)
         self.set_input_value("시간단위", tick_unit)
         #self.set_input_value("시간단위", 15)
@@ -237,7 +233,6 @@ class api():
                 temp = temp.replace('F0','EE')
             
         rtn = self.comm_rq_data("해외선물옵션틱그래프조회","opc10001", prevNext, subject.info[subject_code]['화면번호'])
-
         if rtn != 0:
             # 에러코드별 로그
             log.error(self.parse_error_code(rtn))
@@ -261,12 +256,26 @@ class api():
         if rtn == -200:
             time.sleep(0.5)
             self.request_tick_info(subject_code, tick_unit, prevNext)
-        
+
+
+    def request_day_info(self, subject_code, prevNext):
+        print("request_day_info")
+        self.set_input_value("종목코드", subject_code)
+        self.set_input_value("조회일자", "")
+        rtn = self.comm_rq_data("해외선물옵션일차트조회","opc10003", prevNext, subject.info[subject_code]['화면번호'])
+
+        if rtn != 0:
+            # 에러코드별 로그
+            log.error(self.parse_error_code(rtn))
+
+        if rtn == -200:
+            time.sleep(0.5)
+            self.request_day_info(subject_code, prevNext)
+
 
     def set_input_value(self, sID, sValue):
         """
         Tran 입력 값을 서버통신 전에 입력한다.
-
         :param sID: 아이템명
         :param sValue: 입력 값
         Ex) openApi.SetInputValue(“종목코드”, “000660”);
@@ -277,7 +286,6 @@ class api():
     def comm_rq_data(self, sRQName, sTrCode, nPrevNext, sScreenNo):
         """
         Tran을 서버로 송신한다.
-
         :param sRQName: 사용자구분 명
         :param sTrCode: Tran명 입력
         :param nPrevNext: 0:조회, 2:연속
@@ -305,7 +313,6 @@ class api():
         """
         Tran 수신시 이벤트
         서버통신 후 데이터를 받은 시점을 알려준다.
-
         :param py: 화면번호
         :param sRQName: 사용자구분 명
         :param sTrCode: Tran 명
@@ -350,16 +357,14 @@ class api():
 
             try:
                 subject_code = order_info['종목코드']
-                if subject.info[subject_code]['전략'] == "풀파라":
+                if subject.info[subject_code]['전략'] == "풀파라" or subject.info[subject_code]['전략'] == "리버스온리":
                     if (calc.data[subject_code]['플로우'][-1] == "상향" and order_contents['매도수구분'] == '신규매도') or (calc.data[subject_code]['플로우'][-1] == '하향' and order_contents['매도수구분'] == '신규매수'):
                         log.info("반대매매 True로 변경.")
                         subject.info[subject_code]['반대매매'] = True
-                        order_contents['손절틱'] = subject.info[order_info['종목코드']]['리버스손절틱']
             except Exception as err:
-                log.error("초기 계약 불러오는 과정에서 반대매매설정 과정 오류(kiwoom.py:358)")
                 log.error(err)
-
-            contract.add_contract(order_info, order_contents)
+                
+            contract.add_contract(order_info, order_contents)            
             return
         
         elif sRQName == "상품별증거금조회":
@@ -377,17 +382,70 @@ class api():
             log.info('예수금 현황 : ' + str(contract.my_deposit))
             return
 
-        if sRQName == "해외선물옵션틱그래프조회":
+        if sRQName == "해외선물옵션일차트조회":
+            print("sRQName:해외선물옵션일차트조회")
+            #for문의 이유는 미래의 여러종목일때 그때 종목마다 일차트를 그리기 위해서 존재 nyny
             for subject_code in subject.info.keys():
-                if sScrNo == subject.info[subject_code]['화면번호']:  
+                #화면 번호는 hts 창같은 개념으로 창을 여러개 띄울때만 사용하는것~! 우리는 여러개 창을 띄워 보는게 아니니깐 그냥 종목별로 유니크한 번호 1개만 screen에 설정해주고 subject_code에 추가만 시켜주면됨~!
+                if sScrNo == subject.info[subject_code]['화면번호']:
                     if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
-                        calc.create_data(subject_code)
+                        calc.create_d_data(subject_code)
                         self.recent_price_list[subject_code] = []
                         self.current_candle[subject_code] = []
 
                         if d.get_mode() == d.REAL:
-                            # 종목코드 데이터가 있는지 확인
+                            datas = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
+                            datas = datas.split()
+
+                            subject_code = ""
+                            for subject_code in subject.info.keys():
+                                subject_code = subject_code
+
+                            if subject_code not in calc.data_day:
+                                calc.data_day[subject_code] = []
+                            i = 0
+                            while ( i < len(datas) ):
+                                d_candle = {}
+                                #일봉에서는 현재가가 종가가됨
+                                d_candle['현재가'] = datas[i]
+                                d_candle['시가'] = datas[i+1]
+                                d_candle['고가'] = datas[i+2]
+                                d_candle['저가'] = datas[i+3]
+                                d_candle['일자'] = datas[i+4]
+                                d_candle['누적거래량'] = datas[i+5]
+                                d_candle['영업일자'] = datas[i+6]
+
+                                calc.data_day[subject_code].append(d_candle)
+                                i = i + 7
+
+                            calc.data_day[subject_code].reverse()
+                            pass
+                        elif d.get_mode() == d.TEST:
+                            # 이게 가능한 이유는 test에서 Tr데이터를 요청할때 candle을 파라미터로 넘김!
+                            self.recent_price[subject_code] = d_candle['현재가']
+                            self.recent_candle_time[subject_code] = d_candle['체결시간']
+                            price = d_candle
+                            print(price)
+
+        if sRQName == "해외선물옵션틱그래프조회":
+            # for문의 이유는 미래의 여러종목일때 그때 종목마다 틱차트를 그리기 위해서 존재 nyny
+            for subject_code in subject.info.keys():
+                # 화면 번호는 hts 창같은 개념으로 창을 여러개 띄울때만 사용하는것~! 우리는 여러개 창을 띄워 보는게 아니니깐 그냥 종목별로 유니크한 번호 1개만 screen에 설정해주고 subject_code에 추가만 시켜주면됨~!
+                if sScrNo == subject.info[subject_code]['화면번호']:
+                    # 틱INFO라서 처음에 틱정보를 요청하게 되면 calc에 계산해야 하는 data들을 만들고 price에 값정보들을 넣는 부분
+                    if subject_code not in calc.data or calc.data[subject_code]['idx'] == -1:
+                        #처음 틱정보가 들어오면 우리가 원하는 고가,저가,sar, 볼린저밴드, 이평선, 일목균형표를 초기화함
+                        calc.create_data(subject_code)
+                        #안씀
+                        self.recent_price_list[subject_code] = []
+                        #종목별 캔들리스트를 초기화함
+                        self.current_candle[subject_code] = []
+
+                        if d.get_mode() == d.REAL:
+                            # 종목코드 데이터가 있는지 확인 9000이 최소 캔들수~!
                             if subject_code in self.candle_data.keys() and len(self.candle_data[subject_code]) > 9000 * 7:
+
+                                #수신된 전체데이터를 반환한다.(feat.키움open_api pdf)
                                 data = self.ocx.dynamicCall("GetCommFullData(QString, QString, int)", sTrCode, sRecordName, 0)
                                 data = data.split()
                                 self.candle_data[subject_code] = self.candle_data[subject_code] + data[1:]
@@ -439,7 +497,8 @@ class api():
                                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['저가'] = float(data[6])
                                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['체결시간'] = float(data[3])
                                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['거래량'] = float(data[2])
-                                    
+
+                                    # 종목별 이전 tick정보를 가져올때 실데이터가 들어올수있으니 그시간동안 들어온 실데이터를 저장하는 리스트
                                     self.temp_candle[subject_code] = []
                                     if subject.info[subject_code]['현재가변동횟수'] == subject.info[subject_code]['시간단위']:
                                         self.temp_candle.append(subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
@@ -454,13 +513,17 @@ class api():
 
                             #calc.show_current_price(subject_code, self.recent_price[subject_code])
                         elif d.get_mode() == d.TEST:
+                            #이게 가능한 이유는 test에서 Tr데이터를 요청할때 candle을 파라미터로 넘김!
                             self.recent_price[subject_code] = candle['현재가']
                             self.recent_candle_time[subject_code] = candle['체결시간']
                         
+                        #안씀
                         for idx in range(0,10): self.recent_price_list[subject_code].append(self.recent_price[subject_code]) # 현재가 삽입
+                        #안씀
                         self.adjusted_price[subject_code] = round( float( sum(self.recent_price_list[subject_code])) / max(len(self.recent_price_list[subject_code]), 1) , subject.info[subject_code]['자릿수'])
                         if d.get_mode() == d.REAL: return
 
+                    #틱INFO라서 처음에 600캔들 요청하고 나면 data가 만들어져 있으니 이후에 price에 추가
                     if d.get_mode() == d.REAL: # 실제투자
                         price['현재가'] = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRecordName, 1, '현재가')
                         price['저가'] = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRecordName, 1, '저가')
@@ -502,12 +565,20 @@ class api():
                     del subject.info[subject_symbol]
                     
                     # 초기 데이터 요청
-                    self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
-                    time.sleep(0.3)
+                    if subject.info[subject_code]['전략'] == '일봉매매':
+
+                        self.request_day_info(subject_code,"")
+                        time.sleep(0.3)
+                    elif subject.info[subject_code]['전략'] == '남용T':
+                        # self.request_day_info(subject_code, "")
+                        # time.sleep(0.3)
+                        self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
+                        time.sleep(0.3)
+                    else:
+                        self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
+                        time.sleep(0.3)
                         
             #if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
-            #if d.RECEIVED_PRODUCT_COUNT > 0:
-            log.info("필요없는 종목 리얼데이터 수신 끔")
             self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
             self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
 
@@ -531,7 +602,6 @@ class api():
         """
         실시간 시세 이벤트
         실시간데이터를 받은 시점을 알려준다.
-
         :param subject_code: 종목코드
         :param sRealType: 리얼타입
         :param sRealData: 실시간 데이터전문
@@ -647,6 +717,7 @@ class api():
                         sell_contents = trend_band.is_it_sell(subject_code, current_price, self.adjusted_price[subject_code])
                     elif subject.info[subject_code]['전략'] == '큰파라':
                         sell_contents = big_para.is_it_sell(subject_code, current_price)
+                    #full_para가 이렇게 복잡한 이유는 반대매매(reverse) 때문에 이렇게 된다~!
                     elif subject.info[subject_code]['전략'] == '풀파라':
                         sell_contents = full_para.is_it_sell(subject_code, current_price)
                         if sell_contents['신규주문'] == True:
@@ -655,6 +726,18 @@ class api():
                                 if buy_contents['매도수구분'] != sell_contents['매도수구분']:
                                     sell_contents = buy_contents
                                     next_state = '매매시도중'
+                    elif subject.info[subject_code]['전략'] == '리버스온리':
+                        sell_contents = reverse_only.is_it_sell(subject_code, current_price)
+                        if sell_contents['신규주문'] == True:
+                            buy_contents = reverse_only.is_it_OK(subject_code, current_price)
+                            if buy_contents['신규주문'] == True:
+                                if buy_contents['매도수구분'] != sell_contents['매도수구분']:
+                                    sell_contents = buy_contents
+                                    next_state = '매매시도중'
+                    elif subject.info[subject_code]['전략'] == 'MA30100':
+                        sell_contents = mathirtyhundred.is_it_sell(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == '남용T':
+                        sell_contents = ns.is_it_sell(subject_code, current_price)
 
                     if sell_contents['신규주문'] == True:
                         res.info('주문 체결시간 : ' + str(current_time))
@@ -689,7 +772,9 @@ class api():
                 elif contract.get_contract_count(subject_code) == 0 and subject.info[subject_code]['상태'] != '매매시도중' and subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code]['상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
                 #elif subject.info[subject_code]['상태'] != '매매시도중' and subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code]['상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
                 #################
-                    
+
+                    #리얼 데이터로 실제 1틱씩 들어올때마다 타는 플로우~!nyny
+                    #contract.get_contract_count(subject_code) == 0 이게 계약수가 없을때만 살지 말지를 판단 해서 계약수가 있을때(1이상)일때는 안들어옴~!
                     order_contents = None
                     if subject.info[subject_code]['전략'] == '해동이':
                         order_contents = santa.is_it_OK(subject_code, current_price)
@@ -702,6 +787,13 @@ class api():
                         order_contents = big_para.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '풀파라':
                         order_contents = full_para.is_it_OK(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == '리버스온리':
+                        order_contents = reverse_only.is_it_OK(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == 'MA30100':
+                        order_contents = mathirtyhundred.is_it_OK(subject_code, current_price)
+                    elif subject.info[subject_code]['전략'] == '남용T':
+                        order_contents = ns.is_it_OK(subject_code, current_price)
+
                     else:
                         return
 
@@ -749,7 +841,6 @@ class api():
     def OnReceiveChejanData(self, sGubun, nItemCnt, sFidList, o_info = None):
         """
         체결데이터를 받은 시점을 알려준다.
-
         :param sGubun: 체결구분 - 0:주문체결통보, 1:잔고통보, 3:특이신호
         :param nItemCnt: 아이템갯수
         :param sFidList: 데이터리스트 - 데이터 구분은 ‘;’ 이다.
@@ -908,7 +999,7 @@ class api():
                             else:
                                 log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code]['상태'] + ' -> 중립대기.')
                                 subject.info[subject_code]['상태'] = '중립대기'
-                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라':
+                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라' or subject.info[subject_code]['전략'] == '리버스온리' or subject.info[subject_code]['전략'] == 'MA30100':
                             if contract.get_contract_count(subject_code) > 0:
                                 if subject.info[subject_code]['청산내용']['수량'] > 0:
                                     log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code]['상태'] + ' -> 청산시도중.')
@@ -964,7 +1055,6 @@ class api():
     def OnEventConnect(self, nErrCode):
         """
         통신 연결 상태 변경시 이벤트
-
         :param nErrCode: 에러 코드 - 0이면 로그인 성공, 음수면 실패, 에러코드 참조
         """
         print("OnEventConnect received")
@@ -1005,12 +1095,10 @@ class api():
             try:
                 #self.health_server_thread.server.shutdown()
                 self.health_server_thread.server.server_close()
-                print("헬스 체크서버 종료")
+                log.info("헬스 체크서버 종료")
             except Exception as err:
-
                 log.error(err)
                 self.quit()
-                #sys.exit()
 
             self.quit()
 
@@ -1022,7 +1110,6 @@ class api():
     def parse_error_code(err_code):
         """
         Return the message of error codes
-
         :param err_code: Error Code
         :type err_code: str
         :return: Error Message
@@ -1089,8 +1176,6 @@ class api():
             if subject.info[subject_code]['전략'] == '큰파라': subject.info[subject_code]['상태'] = '매매완료'
 
             subject.info[subject_code]['이상신호'] = False
-                
-        
 
     def set_jango_from_db(self):
         for subject_code in subject.info.keys(): 
@@ -1142,4 +1227,3 @@ class api():
         
     def delete_jango_to_db(self,subject_code): 
         self.jango_db.delete_db_contract(subject_code)
-            
