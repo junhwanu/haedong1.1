@@ -85,7 +85,7 @@ class api():
         """
 
         if self.ocx.dynamicCall("GetConnectState()") == 0:
-            rtn = self.ocx.dynamicCall("CommConnect(1)")
+            rtn = self.ocx.dynamicCall("CommConnect(1)"
             if rtn == 0:
                 print("연결 성공")
 
@@ -578,9 +578,9 @@ class api():
                         self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
                         time.sleep(0.3)
                         
-            if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
-                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
-                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
+            #if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
+            self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
+            self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
 
         if sRQName == "장운영정보조회":
             
