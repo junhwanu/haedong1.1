@@ -85,7 +85,7 @@ class api():
         """
 
         if self.ocx.dynamicCall("GetConnectState()") == 0:
-            rtn = self.ocx.dynamicCall("CommConnect(1)"
+            rtn = self.ocx.dynamicCall("CommConnect(1)")
             if rtn == 0:
                 print("연결 성공")
 
