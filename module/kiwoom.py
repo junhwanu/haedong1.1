@@ -155,7 +155,7 @@ class api():
             self.set_input_value("품목구분", list)
             self.set_input_value("적용일자", today)
             self.comm_rq_data("상품별증거금조회", "opw20004", "", screen.S0011)
-            time.sleep(0.5)
+            #time.sleep(0.5)
         
     def get_contract_list(self):
         print(self.account)
