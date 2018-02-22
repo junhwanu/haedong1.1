@@ -96,8 +96,8 @@ class api():
                 login_thr.start()
 
                 # health server run
-                #self.health_server_thread = health_server.HealthConnectManager()
-                #self.health_server_thread.start()
+                self.health_server_thread = health_server.HealthConnectManager()
+                self.health_server_thread.start()
 
             else:
                 print("연결 실패")
