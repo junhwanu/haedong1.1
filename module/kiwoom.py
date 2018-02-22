@@ -126,14 +126,14 @@ class api():
         for list in lists:
             self.set_input_value("상품코드", list)
             self.comm_rq_data("상품별현재가조회", "opt10006", "", screen.S0010)
-            #time.sleep(0.5)
+            time.sleep(0.5)
         
     def get_dynamic_subject_market_time(self):
         lists = ['MTL','ENG','CUR','IDX','CMD']
         for list in lists:
             self.set_input_value("품목구분", list)
             self.comm_rq_data("장운영정보조회", "opw50001", "", screen.S0011)
-            #time.sleep(0.5)
+            time.sleep(0.5)
 
     def get_jango_list(self):
         self.set_input_value("계좌번호", self.account)
@@ -155,7 +155,7 @@ class api():
             self.set_input_value("품목구분", list)
             self.set_input_value("적용일자", today)
             self.comm_rq_data("상품별증거금조회", "opw20004", "", screen.S0011)
-            #time.sleep(0.5)
+            time.sleep(0.5)
         
     def get_contract_list(self):
         print(self.account)
@@ -578,9 +578,9 @@ class api():
                         self.request_tick_info(subject_code,subject.info[subject_code]["시간단위"], "")
                         time.sleep(0.3)
                         
-            #if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
-            self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
-            self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
+            if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
+                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
+                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
 
         if sRQName == "장운영정보조회":
             
