@@ -57,7 +57,7 @@ def init():
                 candle['현재가'] = float(tick[1])
                 candle['거래량'] += int(tick[2])
                 #candle['체결시간'] = tick[0]
-                candle['체결시간'] = tick[0].strftime('%Y%m%d%H%M%S')
+                if candle['체결시간'] == 0: candle['체결시간'] = tick[0].strftime('%Y%m%d%H%M%S')
                 candle['영업일자'] = tick[3].strftime('%Y%m%d')
                 
                 if tick_cnt == 0:
@@ -74,7 +74,7 @@ def init():
                 if candle_cnt > 10:
                     kw.OnReceiveRealData(subject_code, '해외선물시세', _tick)
                     pass
-                if tick_cnt == subject.info[subject_code]['시간단위']:
+                if tick_cnt == subject.info[subject_code]['시간단위'] or (idx + 1 < len(data) and candle['영업일자'] != data[idx+1][3].strftime('%Y%m%d')) or (idx+1 == len(data)):
                     tick_cnt = 0
                     candle_cnt += 1
                     #res.info(str(candle))
@@ -84,8 +84,10 @@ def init():
                     #input()
             else:
                 print(str(date) + ' 테스트 종료.')
-                break 
+                break
         break
+    for i in range(len(calc.data[subject_code]['이전반전시SAR값'])):
+        print('%s, %s' % (calc.data[subject_code]['SAR반전시간'][i], calc.data[subject_code]['이전반전시SAR값'][i]))
     disconnect()
 
 def setTick(tick):
@@ -149,7 +151,7 @@ def read_tick(table_name):
     
     global curs
     global conn
-    query = "select date, price, volume, working_day from %s"%table_name
+    query = "select date, price, volume, working_day from %s where working_day >= '2018-02-12'"%table_name
     #query = "select date, now_price, volume, working_day from %s"%table_name
     curs.execute(query)
     conn.commit()   

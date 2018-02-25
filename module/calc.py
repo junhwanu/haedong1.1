@@ -63,7 +63,7 @@ def create_data(subject_code):
     data[subject_code]['저가'] = []
     data[subject_code]['체결시간'] = []
     data[subject_code]['캔들'] = []
-    data[subject_code]['SAR반전시간'] = []
+    data[subject_code]['SAR반전시간'] = [0]
     data[subject_code]['매매가능가'] = 0
     
     data[subject_code]['정배열연속틱'] = 1
