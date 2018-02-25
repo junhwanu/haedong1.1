@@ -151,7 +151,7 @@ def read_tick(table_name):
     
     global curs
     global conn
-    query = "select date, price, volume, working_day from %s where working_day >= '2018-02-12'"%table_name
+    query = "select date, price, volume, working_day from %s"%table_name
     #query = "select date, now_price, volume, working_day from %s"%table_name
     curs.execute(query)
     conn.commit()   
