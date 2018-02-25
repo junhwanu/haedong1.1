@@ -41,7 +41,7 @@ class HealthConnectManager(threading.Thread):
             print("Start health connection thr! Waiting client from port #" + str(self.bind_port))
             poll_interval = 1
             self.server.serve_forever(poll_interval)
-            print("here")
+
 
         except Exception as err:
             print("Exception ({0})".format(err))
@@ -52,11 +52,10 @@ class HealthConnectManager(threading.Thread):
 
     def print_status(self):
         print(self.__getattribute__())
-        
+
     def server_close(self):
         if self.server is not None:
             self.server.shutdown()
-
 
 if __name__ == '__main__':
     # Example code
