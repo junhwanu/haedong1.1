@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, \
-    reverse_only
+import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, reverse_only
 import auto_login
 import define as d
 import json
@@ -11,12 +10,13 @@ import my_util
 import log_result as res
 import jango
 import notification
+import ns
 
 from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
 import db
 import health_server
-import ns
+
 
 kiwoom = None
 
@@ -50,7 +50,6 @@ class api():
     gain = []
     temp_candle = {}
     health_server_thread = None
-    main_subject_code = None
 
     def __init__(self, mode=1):
         super(api, self).__init__()
@@ -158,7 +157,6 @@ class api():
             self.set_input_value("적용일자", today)
             self.comm_rq_data("상품별증거금조회", "opw20004", "", screen.S0011)
             time.sleep(0.5)
-
 
     def get_contract_list(self):
         print(self.account)
@@ -309,7 +307,7 @@ class api():
         """ Quit the server """
 
         QApplication.quit()
-        sys.exit()
+        sys.exit(0)
 
         ####################################################
 
@@ -392,8 +390,7 @@ class api():
                             self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRecordName, i,
                                                  '위탁증거금').strip())
                         subject.info[subject_code]['위탁증거금'] = subject_deposit
-                        log.info("%s 위탁증거금:%s" % (subject_code,subject.info[subject_code]['위탁증거금']))
-
+                        print("위탁증거금 %s" % subject.info[subject_code]['위탁증거금'])
             return
         elif sRQName == "예수금및증거금현황조회":
             contract.my_deposit = int(
@@ -608,7 +605,6 @@ class api():
                 if subject_symbol in subject.info.keys():
                     log.info("금일 %s의 종목코드는 %s 입니다." % (subject.info[subject_symbol]["종목명"], subject_code))
                     subject.info[subject_code] = subject.info[subject_symbol]
-                    self.main_subject_code = subject_code
                     del subject.info[subject_symbol]
 
                     # 초기 데이터 요청
@@ -623,7 +619,7 @@ class api():
                         time.sleep(0.3)
                     else:
                         self.request_tick_info(subject_code, subject.info[subject_code]["시간단위"], "")
-                        #time.sleep(0.3)
+                        time.sleep(0.3)
 
             if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
                 self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
@@ -674,7 +670,6 @@ class api():
                 log.error("kw:525, " + err)
 
         # log.debug("OnReceiveRealData entered.")
-        #print("%s : %s" % (subject_code, sRealType))
         if subject_code not in subject.info.keys() and d.get_mode() == d.REAL:  # 정의 하지 않은 종목이 실시간 데이터 들어오는 경우 실시간 해제
             # self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
             # self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
@@ -685,8 +680,6 @@ class api():
 
         if sRealType == '해외선물시세':
             if d.get_mode() == d.REAL:  # 실제투자
-
-
                 current_price = self.ocx.dynamicCall("GetCommRealData(QString, int)", "현재가", 140)  # 140이 뭔지 확인
                 current_time = self.ocx.dynamicCall("GetCommRealData(QString, int)", "체결시간", 20)  # 체결시간이 뭔지 확인
                 current_price = round(float(current_price), subject.info[subject_code]['자릿수'])
@@ -1179,13 +1172,12 @@ class api():
                 # 종목 정보 로그 찍기
                 log.info("참여 종목 : %s" % subject.info.values())
                 # self.set_jango_from_db()
-                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
-                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
 
-                if '위탁증거금' not in subject.info[self.main_subject_code]:
-                    notification.sendMessage("에러!! 위탁증거금을 가져오지 못했습니다", self.account)
-                else:
-                    print("위탁증거금 확인 완료")
+                #if '위탁증거금' not in subject.info[self.main_subject_code]:
+                #    notification.sendMessage("에러!! 위탁증거금을 가져오지 못했습니다", self.account)
+                #    print("에러!! 위탁증거금을 가져오지 못했습니다")
+                #else:
+                #    print("위탁증거금 확인 완료")
 
         else:
             c_time = "%02d%02d" % (time.localtime().tm_hour, time.localtime().tm_min)
@@ -1205,7 +1197,7 @@ class api():
 
             try:
                 # self.health_server_thread.server.shutdown()
-                self.health_server_thread.server.server_close()
+                self.health_server_thread.server_close()
                 log.info("헬스 체크서버 종료")
             except Exception as err:
                 log.error(err)
