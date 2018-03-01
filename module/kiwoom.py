@@ -699,6 +699,12 @@ class api():
                 # log.debug("현재가 변동횟수, " + str(subject.info[subject_code]['현재가변동횟수']))
                 # log.debug("make candle, " + str(subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]))
                 if subject.info[subject_code]['현재가변동횟수'] == subject.info[subject_code]['시간단위']:
+                    # 필요없는 현재가 realdata 수신 종료
+                    if len(calc.data[subject_code]['캔들']) == 9599:
+                        log.info("필요없는 현재가 realdata 수신 종료")
+                        self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
+                        self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
+                        
                     # 캔들 추가
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['체결시간'] = current_time
 
@@ -1199,6 +1205,7 @@ class api():
                 # self.health_server_thread.server.shutdown()
                 self.health_server_thread.server_close()
                 log.info("헬스 체크서버 종료")
+                self.quit()
             except Exception as err:
                 log.error(err)
                 self.quit()
