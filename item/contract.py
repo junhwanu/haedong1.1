@@ -130,10 +130,10 @@ def delete_contract(subject_code):
         
 def get_commission(account):
     if account == "5105855972":
-        return 12
+        return 15
     elif account == "5107243872":
-        return 12
+        return 15
     elif account == "51115392":
-        return 12
+        return 15
 
     return 15

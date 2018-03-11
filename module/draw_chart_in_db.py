@@ -16,7 +16,7 @@ conn = pymysql.connect(host='211.253.10.91', user='root', password='goehddl', db
 cur = conn.cursor()
 
 
-def request_tick_candle(subject_code, tick_unit, start_date='20170101', end_date='20201231'):
+def request_tick_candle(subject_code, tick_unit, start_date='20171205', end_date='20171205'):
     query = '''
     select t1.id
          , t1.date
@@ -59,7 +59,7 @@ def request_tick_candle(subject_code, tick_unit, start_date='20170101', end_date
 
 
 #df = pd.read_csv('oil.csv')
-df = pd.read_sql(request_tick_candle("GCM17",60, start_date='20170525', end_date='20170527'), conn)
+df = pd.read_sql(request_tick_candle("GCG18", 60, start_date='20171205', end_date='20171205'), conn)
 
 print(df)
 

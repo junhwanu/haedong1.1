@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, \
-    reverse_only
+import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, reverse_only
 import auto_login
 import define as d
 import json
@@ -11,12 +10,13 @@ import my_util
 import log_result as res
 import jango
 import notification
+import ns
 
 from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
 import db
 import health_server
-import ns
+
 
 kiwoom = None
 
@@ -50,7 +50,6 @@ class api():
     gain = []
     temp_candle = {}
     health_server_thread = None
-    main_subject_code = None
 
     def __init__(self, mode=1):
         super(api, self).__init__()
@@ -159,7 +158,6 @@ class api():
             self.comm_rq_data("상품별증거금조회", "opw20004", "", screen.S0011)
             time.sleep(0.5)
 
-
     def get_contract_list(self):
         print(self.account)
         self.set_input_value("계좌번호", self.account)
@@ -171,7 +169,7 @@ class api():
         rtn = self.comm_rq_data("주문체결내역조회", "opw30005", "", screen.S0012)
         print(rtn)
 
-    def send_order(self, contract_type, subject_code, contract_cnt):
+    def send_order(self, contract_type, subject_code, contract_cnt, current_price = None):
 
         """
         주식 주문을 서버로 전송한다.
@@ -220,7 +218,7 @@ class api():
                 "SendOrder(QString, QString, QString, int, QString, int, QString, QString, QString, QString)",
                 [contract_type, '0101', self.account, _contract_type, subject_code, contract_cnt, '0', '0', '1', ''])
         elif d.get_mode() == d.TEST:  # 테스트
-            tester.send_order(contract_type, subject_code, contract_cnt, '1')
+            tester.send_order(contract_type, subject_code, contract_cnt, '1', current_price)
             return 0
 
     '''
@@ -307,9 +305,9 @@ class api():
 
     def quit(self):
         """ Quit the server """
-
+        print("qutie()")
         QApplication.quit()
-        sys.exit()
+        sys.exit(0)
 
         ####################################################
 
@@ -392,8 +390,7 @@ class api():
                             self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRecordName, i,
                                                  '위탁증거금').strip())
                         subject.info[subject_code]['위탁증거금'] = subject_deposit
-                        log.info("%s 위탁증거금:%s" % (subject_code,subject.info[subject_code]['위탁증거금']))
-
+                        print("위탁증거금 %s" % subject.info[subject_code]['위탁증거금'])
             return
         elif sRQName == "예수금및증거금현황조회":
             contract.my_deposit = int(
@@ -608,7 +605,6 @@ class api():
                 if subject_symbol in subject.info.keys():
                     log.info("금일 %s의 종목코드는 %s 입니다." % (subject.info[subject_symbol]["종목명"], subject_code))
                     subject.info[subject_code] = subject.info[subject_symbol]
-                    self.main_subject_code = subject_code
                     del subject.info[subject_symbol]
 
                     # 초기 데이터 요청
@@ -623,7 +619,7 @@ class api():
                         time.sleep(0.3)
                     else:
                         self.request_tick_info(subject_code, subject.info[subject_code]["시간단위"], "")
-                        #time.sleep(0.3)
+                        time.sleep(0.3)
 
             if d.RECEIVED_PRODUCT_COUNT == d.PRODUCT_CNT:
                 self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
@@ -674,7 +670,7 @@ class api():
                 log.error("kw:525, " + err)
 
         # log.debug("OnReceiveRealData entered.")
-        #print("%s : %s" % (subject_code, sRealType))
+        #print("%s %s" % (subject_code, sRealType))
         if subject_code not in subject.info.keys() and d.get_mode() == d.REAL:  # 정의 하지 않은 종목이 실시간 데이터 들어오는 경우 실시간 해제
             # self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
             # self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
@@ -685,13 +681,17 @@ class api():
 
         if sRealType == '해외선물시세':
             if d.get_mode() == d.REAL:  # 실제투자
-
-
                 current_price = self.ocx.dynamicCall("GetCommRealData(QString, int)", "현재가", 140)  # 140이 뭔지 확인
                 current_time = self.ocx.dynamicCall("GetCommRealData(QString, int)", "체결시간", 20)  # 체결시간이 뭔지 확인
                 current_price = round(float(current_price), subject.info[subject_code]['자릿수'])
 
                 subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['현재가'] = current_price
+
+                print("현재가변동횟수:%s" % subject.info[subject_code]['현재가변동횟수'])
+                print("캔들수:%s" % len(calc.data[subject_code]['캔들']))
+                #if subject.info[subject_code]['현재가변동횟수'] == 50:
+                #    self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
+                #    self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
                 if subject.info[subject_code]['현재가변동횟수'] == 0:
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['시가'] = current_price
 
@@ -706,6 +706,12 @@ class api():
                 # log.debug("현재가 변동횟수, " + str(subject.info[subject_code]['현재가변동횟수']))
                 # log.debug("make candle, " + str(subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]))
                 if subject.info[subject_code]['현재가변동횟수'] == subject.info[subject_code]['시간단위']:
+
+                    if len(calc.data[subject_code]['캔들']) == 9599:
+                        log.info("필요없는 현재가 realdata 수신 종료")
+                        self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
+                        self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
+
                     # 캔들 추가
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['체결시간'] = current_time
 
@@ -740,7 +746,7 @@ class api():
             elif d.get_mode() == d.TEST:  # 테스트
                 current_price = sRealData['현재가']
                 current_time = sRealData['체결시간']
-                current_price = round(float(current_price), subject.info[subject_code]['자릿수'])
+                #current_price = round(float(current_price), subject.info[subject_code]['자릿수'])
                 self.state = '매매가능'
 
             '''
@@ -762,8 +768,7 @@ class api():
                 subject.info[subject_code]['자릿수'])
             self.current_candle[subject_code].append(current_price)
 
-            if subject_code in self.recent_price.keys() and self.recent_price[
-                subject_code] != current_price and self.state == '매매가능':  # and my_util.is_trade_time(subject_code) is True:
+            if self.state == '매매가능':  # and my_util.is_trade_time(subject_code) is True:
                 # log.debug("price changed, " + str(self.recent_price[subject_code]) + " -> " + str(current_price) + ', ' + current_time)
 
                 # 청산
@@ -805,7 +810,7 @@ class api():
                         res.info('주문 체결시간 : ' + str(current_time))
                         subject.info[subject_code]['청산내용'] = sell_contents
 
-                        order_result = self.send_order(sell_contents['매도수구분'], subject_code, sell_contents['수량'])
+                        order_result = self.send_order(sell_contents['매도수구분'], subject_code, sell_contents['수량'], current_price)
 
                         if sell_contents['매도수구분'] == '신규매수':
                             calc.data[subject_code]['매수'].append(calc.data[subject_code]['idx'])
@@ -858,7 +863,11 @@ class api():
                     elif subject.info[subject_code]['전략'] == '큰파라':
                         order_contents = big_para.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == '풀파라':
-                        order_contents = full_para.is_it_OK(subject_code, current_price)
+                        if not calc.data[subject_code]['맞틀체크']:
+                            order_contents = full_para.is_it_OK(subject_code, current_price)
+                        else: order_contents = {'신규주문':False}
+
+
                     elif subject.info[subject_code]['전략'] == '리버스온리':
                         order_contents = reverse_only.is_it_OK(subject_code, current_price)
                     elif subject.info[subject_code]['전략'] == 'MA30100':
@@ -877,7 +886,7 @@ class api():
 
                         res.info('주문 내용 : ' + str(order_contents))
                         subject.info[subject_code]['주문내용'] = order_contents
-                        order_result = self.send_order(order_contents['매도수구분'], subject_code, order_contents['수량'])
+                        order_result = self.send_order(order_contents['매도수구분'], subject_code, order_contents['수량'], current_price)
 
                         if order_contents['매도수구분'] == '신규매수':
                             calc.data[subject_code]['매수'].append(calc.data[subject_code]['idx'])
@@ -1179,13 +1188,12 @@ class api():
                 # 종목 정보 로그 찍기
                 log.info("참여 종목 : %s" % subject.info.values())
                 # self.set_jango_from_db()
-                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
-                self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
 
-                if '위탁증거금' not in subject.info[self.main_subject_code]:
-                    notification.sendMessage("에러!! 위탁증거금을 가져오지 못했습니다", self.account)
-                else:
-                    print("위탁증거금 확인 완료")
+                #if '위탁증거금' not in subject.info[self.main_subject_code]:
+                #    notification.sendMessage("에러!! 위탁증거금을 가져오지 못했습니다", self.account)
+                #    print("에러!! 위탁증거금을 가져오지 못했습니다")
+                #else:
+                #    print("위탁증거금 확인 완료")
 
         else:
             c_time = "%02d%02d" % (time.localtime().tm_hour, time.localtime().tm_min)
@@ -1194,19 +1202,23 @@ class api():
             err_msg = "에러코드별 메시지"
             log.critical(err_msg)
 
-            if int(c_time) >= 700 or int(c_time) < 600:
-                # 메일 발송
-                if d.get_mode() == d.REAL:
-                    # gmail.send_email('[긴급' + str(c_time) + '] 해동이 작동 중지', '에러코드')
-                    notification.sendMessage("긴급! 해동이 작동 중지!", self.account)
+
+            #if int(c_time) >= 700 or int(c_time) < 600:
+            #    # 메일 발송
+            #    if d.get_mode() == d.REAL:
+            #        # gmail.send_email('[긴급' + str(c_time) + '] 해동이 작동 중지', '에러코드')
+            #        notification.sendMessage("긴급! 해동이 작동 중지!", self.account)
+
 
                 # 자동이 재시작 로직 작성
-                pass
+            #    pass
 
             try:
                 # self.health_server_thread.server.shutdown()
-                self.health_server_thread.server.server_close()
+                self.health_server_thread.server_close()
                 log.info("헬스 체크서버 종료")
+                self.quit()
+                #raise SystemExit
             except Exception as err:
                 log.error(err)
                 self.quit()

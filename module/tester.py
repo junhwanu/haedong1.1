@@ -69,6 +69,8 @@ def init():
 
                 recent_price[subject_code] = float(tick[1])
                 _tick = setTick(tick)
+
+                #log.info("tester %s" % _tick)
                 
                 tick_cnt += 1
                 if candle_cnt > 10:
@@ -86,15 +88,18 @@ def init():
                 print(str(date) + ' 테스트 종료.')
                 break
         break
-    for i in range(len(calc.data[subject_code]['이전반전시SAR값'])):
-        print('%s, %s' % (calc.data[subject_code]['SAR반전시간'][i], calc.data[subject_code]['이전반전시SAR값'][i]))
+    #for i in range(len(calc.data[subject_code]['이전반전시SAR값'])):
+        #print('%s, %s' % (calc.data[subject_code]['SAR반전시간'][i], calc.data[subject_code]['이전반전시SAR값'][i]))
+    #    pass
     disconnect()
 
 def setTick(tick):
     return {'현재가':float(tick[1]), '체결시간':tick[0], '거래량':tick[2], '시가':float(tick[1]), '고가':float(tick[1]), '저가':float(tick[1]), '영업일자':tick[3]}
 
-def send_order(contract_type, subject_code, contract_cnt, order_type):
+def send_order(contract_type, subject_code, contract_cnt, order_type, current_price = None):
     order_info = {}
+
+    log.info("sned_order() current_price:%s" % current_price)
     if contract_type == '신규매수':
         order_info['주문번호'] = 0        # 주문번호 
         order_info['원주문번호'] = 0       # 원주문번호
@@ -102,7 +107,7 @@ def send_order(contract_type, subject_code, contract_cnt, order_type):
         order_info['종목코드'] = subject_code             # 종목코드
         order_info['매도수구분'] = 2      # 매도수구분(1 : 매도, 2 : 매수)
         #print("recnet_price[subject_code]:%s" % recent_price[subject_code])
-        order_info['체결표시가격'] = str(round(recent_price[subject_code] + subject.info[subject_code]['단위'], subject.info[subject_code]['자릿수']))        # 체결표시가격
+        order_info['체결표시가격'] = str(round(current_price + subject.info[subject_code]['단위'], subject.info[subject_code]['자릿수']))        # 체결표시가격
         if contract.get_contract_count(subject_code) > 0:
             order_info['신규수량'] = 0       # 신규수량
             order_info['청산수량'] = contract_cnt
@@ -118,7 +123,7 @@ def send_order(contract_type, subject_code, contract_cnt, order_type):
         order_info['종목코드'] = subject_code             # 종목코드
         order_info['매도수구분'] = 1       # 매도수구분(1 : 매도, 2 : 매수)
         #print("recnet_price[subject_code]:%s" % recent_price[subject_code])
-        order_info['체결표시가격'] = str(round(recent_price[subject_code] - subject.info[subject_code]['단위'], subject.info[subject_code]['자릿수']))        # 체결표시가격
+        order_info['체결표시가격'] = str(round(current_price - subject.info[subject_code]['단위'], subject.info[subject_code]['자릿수']))        # 체결표시가격
         if contract.get_contract_count(subject_code) > 0:
             order_info['신규수량'] = 0       # 신규수량
             order_info['청산수량'] = contract_cnt
@@ -151,7 +156,8 @@ def read_tick(table_name):
     
     global curs
     global conn
-    query = "select date, price, volume, working_day from %s"%table_name
+    #query = "select date, price, volume, working_day from %s where working_day <= '2018-02-13'"%table_name
+    query = "select date, price, volume, working_day from %s" % table_name
     #query = "select date, now_price, volume, working_day from %s"%table_name
     curs.execute(query)
     conn.commit()   

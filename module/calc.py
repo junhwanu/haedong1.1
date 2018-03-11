@@ -7,7 +7,7 @@ import math
 data = {}
 data['이동평균선'] = {}
 #우리가 사용할 이동평균선의 일자를 설정
-data['이동평균선']['일수'] = [30, 45, 60, 100, 150, 160]
+data['이동평균선']['일수'] = [23, 45, 122, 160]
 
 data_day = {}
 data_day['이동평균선'] = {}
@@ -43,6 +43,7 @@ def create_data(subject_code):
 
     #Add
     data[subject_code]['이전반전시SAR값'] = [0]
+    data[subject_code]['맞틀체크'] = False
 
     for days in data['이동평균선']['일수']:
         data[subject_code]['이동평균선'][days] = []
@@ -216,6 +217,7 @@ def push(subject_code, price):
     highest_price = round(float(price['고가']), subject.info[subject_code]['자릿수'])
     lowest_price = round(float(price['저가']), subject.info[subject_code]['자릿수'])
     '''
+    data[subject_code]['맞틀체크'] = False
     current_price = float(price['현재가'])
     start_price = float(price['시가'])
     highest_price = float(price['고가'])
@@ -224,6 +226,9 @@ def push(subject_code, price):
     volume = int(price['거래량'])
 
     candle = data[subject_code]['idx'] + 1, start_price, highest_price, lowest_price, current_price, volume
+
+    #res.error("캔들:%s" % price)
+
 
     data[subject_code]['현재가'].append(current_price)
     data[subject_code]['시가'].append(start_price)
@@ -759,6 +764,8 @@ def calculate_sar(subject_code):
             
             data[subject_code]['이전반전시SAR값'].append(next_sar)
             data[subject_code]['SAR반전시간'].append(data[subject_code]['체결시간'][index])
+
+            log.info("반전 시 현재가: %s" % next_sar)
             
             if data[subject_code]['이전반전시SAR값'][-2] - next_sar > 0:
                 subject.info[subject_code]['맞틀리스트'].append('틀')
@@ -821,6 +828,7 @@ def calculate_sar(subject_code):
             
             data[subject_code]['이전반전시SAR값'].append(next_sar)
             data[subject_code]['SAR반전시간'].append(data[subject_code]['체결시간'][index])
+            log.info("반전 시 현재가: %s" % next_sar)
             
             if data[subject_code]['이전반전시SAR값'][-2] - next_sar > 0:
                 subject.info[subject_code]['맞틀리스트'].append('맞')
