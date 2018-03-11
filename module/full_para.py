@@ -26,7 +26,7 @@ def is_it_OK(subject_code, current_price):
     # param04 = -10
     # param05 = -10
 
-    param01 = 70
+    param01 = 46
     param02 = -15
     param03 = 10
     param04 = -10
@@ -356,9 +356,9 @@ def is_it_OK(subject_code, current_price):
             log.info("장 시작 시간, 마감 시간 정각 및 장외시간에 매매하지 않습니다. 매매금지")
             return false
 
-    if subject.info[subject_code]['반대매매'] == True:
-        subject.info[subject_code]['반대매매'] = False
-        return false
+    #if subject.info[subject_code]['반대매매'] == True:
+    #    subject.info[subject_code]['반대매매'] = False
+    #    return false
 
 
     if d.get_mode() == d.REAL:  # 실제 투자 할때
@@ -416,9 +416,9 @@ def is_it_sell(subject_code, current_price):
 
     try:
         first_chungsan = 70
-        first_chungsan_dribble = 11
+        first_chungsan_dribble = 3
 
-        second_chungsan = 900
+        second_chungsan = 999
         second_chungsan_dribble = 15
 
         sar_before_reverse_tic = 0
@@ -444,7 +444,7 @@ def is_it_sell(subject_code, current_price):
                                   contract.list[subject_code]['계약타입'][
                                       contract.DRIBBLE]}
 
-                elif current_price <= round(contract.list[subject_code]['손절가'],1):
+                elif current_price <= contract.list[subject_code]['손절가']:
 
                     if contract.get_contract_count(subject_code) == subject.info[subject_code]['신규매매수량']:
                         #1차 청산일 때
@@ -541,11 +541,10 @@ def is_it_sell(subject_code, current_price):
                                       contract.DRIBBLE]}
 
 
-                elif current_price >= round(contract.list[subject_code]['손절가'],1):
+                elif current_price >= contract.list[subject_code]['손절가']:
 
                     if contract.get_contract_count(subject_code) == subject.info[subject_code]['신규매매수량']:
                         #1차 청산일 때
-
 
                         #contract_num = int((contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]) / 2)
                         contract_num = int((contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]))
