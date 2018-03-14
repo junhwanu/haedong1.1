@@ -307,6 +307,7 @@ class api():
         """ Quit the server """
         print("qutie()")
         QApplication.quit()
+        self.health_server_thread.server_close()
         sys.exit(0)
 
         ####################################################
@@ -687,8 +688,8 @@ class api():
 
                 subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['현재가'] = current_price
 
-                print("현재가변동횟수:%s" % subject.info[subject_code]['현재가변동횟수'])
-                print("캔들수:%s" % len(calc.data[subject_code]['캔들']))
+                #print("현재가변동횟수:%s" % subject.info[subject_code]['현재가변동횟수'])
+                #print("캔들수:%s" % len(calc.data[subject_code]['캔들']))
                 #if subject.info[subject_code]['현재가변동횟수'] == 50:
                 #    self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
                 #    self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
@@ -721,7 +722,7 @@ class api():
                         # log.info("캔들 추가, 체결시간: " + str(current_time))
 
                         log.info("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code][
-                            'flow'] + " / SAR : " + str(
+                            'flow'] + " \n/ SAR : " + str(
                             subject.info[subject_code]['sar']) + " / 추세 : " + my_util.is_sorted(
                             subject_code) + ", 보유계약:" + str(contract.get_contract_count(subject_code)))
 
@@ -1217,8 +1218,8 @@ class api():
                 # self.health_server_thread.server.shutdown()
                 self.health_server_thread.server_close()
                 log.info("헬스 체크서버 종료")
-                self.quit()
-                #raise SystemExit
+                raise SystemExit
+                #self.quit()
             except Exception as err:
                 log.error(err)
                 self.quit()
