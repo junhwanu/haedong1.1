@@ -61,22 +61,22 @@ def is_it_OK(subject_code, current_price):
                 mesu_medo_type = '신규매도'
                 # return false
 
-        elif calc.data[subject_code]['플로우'][-2] == '하향':
-            # 하향으로 진행하던 플로가 상향으로 상향 반전될때! ex)리스트[-1]은 리스트의 가장 마지막 항목이다
-            log.debug("종목코드(" + subject_code + ") 상향 반전.")
-            profit = calc.data[subject_code]['이전반전시SAR값'][-1] - current_price
-            if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
-                    calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
-                profit = calc.data[subject_code]['이전반전시SAR값'][-2] - current_price
-
-            if my_util.is_sorted(subject_code) == '상승세':
-                mesu_medo_type = '신규매수'
-
-            else:
-                log.info("이동평균선이 맞지 않아 매수 포기합니다.")
-                ma_line_is_true = False
-                mesu_medo_type = '신규매수'
-                # return false
+        # elif calc.data[subject_code]['플로우'][-2] == '하향':
+        #     # 하향으로 진행하던 플로가 상향으로 상향 반전될때! ex)리스트[-1]은 리스트의 가장 마지막 항목이다
+        #     log.debug("종목코드(" + subject_code + ") 상향 반전.")
+        #     profit = calc.data[subject_code]['이전반전시SAR값'][-1] - current_price
+        #     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
+        #             calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
+        #         profit = calc.data[subject_code]['이전반전시SAR값'][-2] - current_price
+        #
+        #     if my_util.is_sorted(subject_code) == '상승세':
+        #         mesu_medo_type = '신규매수'
+        #
+        #     else:
+        #         log.info("이동평균선이 맞지 않아 매수 포기합니다.")
+        #         ma_line_is_true = False
+        #         mesu_medo_type = '신규매수'
+        #         # return false
         else:
             return false
 
@@ -97,21 +97,21 @@ def is_it_OK(subject_code, current_price):
                 mesu_medo_type = '신규매수'
                 # return false
 
-        elif calc.data[subject_code]['플로우'][-2] == '상향':
-            log.debug("종목코드(" + subject_code + ") 하향 반전.")
-            profit = current_price - calc.data[subject_code]['이전반전시SAR값'][-1]
-            if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
-                    calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
-                profit = current_price - calc.data[subject_code]['이전반전시SAR값'][-2]
-
-            if my_util.is_sorted(subject_code) == '하락세':
-                mesu_medo_type = '신규매도'
-
-            else:
-                log.info("이동평균선이 맞지 않아 매수 포기합니다.")
-                ma_line_is_true = False
-                mesu_medo_type = '신규매도'
-                # return false
+        # elif calc.data[subject_code]['플로우'][-2] == '상향':
+        #     log.debug("종목코드(" + subject_code + ") 하향 반전.")
+        #     profit = current_price - calc.data[subject_code]['이전반전시SAR값'][-1]
+        #     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
+        #             calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
+        #         profit = current_price - calc.data[subject_code]['이전반전시SAR값'][-2]
+        #
+        #     if my_util.is_sorted(subject_code) == '하락세':
+        #         mesu_medo_type = '신규매도'
+        #
+        #     else:
+        #         log.info("이동평균선이 맞지 않아 매수 포기합니다.")
+        #         ma_line_is_true = False
+        #         mesu_medo_type = '신규매도'
+        #         # return false
         else:
             return false
     else:
@@ -343,7 +343,7 @@ def is_it_OK(subject_code, current_price):
             log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
             return false
     else:
-        if subject_code == "GCG18":
+        if subject_code == "GCG18" or subject_code == "GCJ18":
             if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False:
                 log.info("22:00~23:30 시 사이라 매매 포기 합니다.")
                 return false
@@ -351,9 +351,9 @@ def is_it_OK(subject_code, current_price):
             if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False:
                 log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
                 return false
-        if get_time(0, subject_code) <= int(subject.info[subject_code]['시작시간']) and get_time(0, subject_code) >= int(
+        if get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
             subject.info[subject_code]['마감시간']):
-            log.info("장 시작 시간, 마감 시간 정각 및 장외시간에 매매하지 않습니다. 매매금지")
+            log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
             return false
 
     if subject.info[subject_code]['반대매매'] == True:
@@ -416,7 +416,7 @@ def is_it_sell(subject_code, current_price):
 
     try:
         first_chungsan = 70
-        first_chungsan_dribble = 1
+        first_chungsan_dribble = 11
 
         second_chungsan = 999
         second_chungsan_dribble = 15
@@ -637,16 +637,8 @@ def get_time(add_min, subject_code):
 
         current_time = current_hour * 100 + current_min
 
+
     elif d.get_mode() == d.TEST:  # 테스트
-        current_hour = int(str(calc.data[subject_code]['체결시간'][-1])[8:10])
-        current_min = int(str(calc.data[subject_code]['체결시간'][-1])[10:12])
-        current_min += add_min
-        if current_min >= 60:
-            current_hour += 1
-            current_min -= 60
-
-        current_time = current_hour * 100 + current_min
-
         current_time = int(str(calc.data[subject_code]['체결시간'][-1])[8:12])
 
     return int(current_time)
