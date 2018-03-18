@@ -335,7 +335,7 @@ def is_it_OK(subject_code, current_price):
     #    log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
     #    return false
     if d.get_mode() == d.REAL:  # 실제 투자 할때
-        if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False:
+        if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False:
             log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
             return false
         elif get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
@@ -343,7 +343,7 @@ def is_it_OK(subject_code, current_price):
             log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
             return false
     else:
-        if subject_code == "GCG18":
+        if subject_code == "GCG18" or subject_code == "GCJ18":
             if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False:
                 log.info("22:00~23:30 시 사이라 매매 포기 합니다.")
                 return false
@@ -351,7 +351,7 @@ def is_it_OK(subject_code, current_price):
             if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False:
                 log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
                 return false
-        if get_time(0, subject_code) <= int(subject.info[subject_code]['시작시간']) and get_time(0, subject_code) >= int(
+        if get_time(0, subject_code) <= int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) >= int(
             subject.info[subject_code]['마감시간']):
             log.info("장 시작 시간, 마감 시간 정각 및 장외시간에 매매하지 않습니다. 매매금지")
             return false

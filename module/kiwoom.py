@@ -307,8 +307,9 @@ class api():
         """ Quit the server """
         print("qutie()")
         QApplication.quit()
-        self.health_server_thread.server_close()
         sys.exit(0)
+        #self.health_server_thread.server_close()
+        #sys.exit(0)
 
         ####################################################
 
@@ -1218,8 +1219,8 @@ class api():
                 # self.health_server_thread.server.shutdown()
                 self.health_server_thread.server_close()
                 log.info("헬스 체크서버 종료")
-                raise SystemExit
-                #self.quit()
+                #raise SystemExit
+                self.quit()
             except Exception as err:
                 log.error(err)
                 self.quit()
