@@ -31,6 +31,7 @@ def is_it_OK(subject_code, current_price):
     param03 = 10
     param04 = -17
     param05 = -11
+    param06 = 40
 
     # 300캔들이 없으면 매매 안함
     if calc.data[subject_code]['idx'] < 3000:
@@ -136,7 +137,9 @@ def is_it_OK(subject_code, current_price):
             else:
                 pass
 
-        # if subject.info[subject_code]['수익리스트'][-1] > 160:
+        if subject.info[subject_code]['수익리스트'][-1] > param06:
+            log.info("지난 플로우 수익이 40틱 이상으로 진입 포기")
+            return false
         #     if mesu_medo_type == '신규매도':
         #         mesu_medo_type = '신규매수'
         #     elif mesu_medo_type == '신규매수':
@@ -226,13 +229,16 @@ def is_it_OK(subject_code, current_price):
 
         if subject.info[subject_code]['맞틀리스트'][-1] == '맞' and profit < 0:
             if subject.info[subject_code]['수익리스트'][-1] > param01:
-                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다." % param01)
+                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
                 pass
         #
-        # if profit > 160:
+        if profit > param06:
+            log.info("지난 플로우 수익이 40틱 이상으로 진입 포기")
+            return false
+
         #     if mesu_medo_type == '신규매도':
         #         mesu_medo_type = '신규매수'
         #     elif mesu_medo_type == '신규매수':
@@ -243,7 +249,7 @@ def is_it_OK(subject_code, current_price):
 
         if subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit < 0:
             if subject.info[subject_code]['수익리스트'][-1] < profit and subject.info[subject_code]['수익리스트'][-1] < param02:
-                log.info("틀틀틀틀일때 조건이 맞지 않아 진입 안합니다.")
+                log.info("틀틀틀틀일때 조건이 맞지 않아 진입 안합니다.(param02:%s)" % param02)
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
@@ -269,7 +275,7 @@ def is_it_OK(subject_code, current_price):
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit > 0:
             if subject.info[subject_code]['수익리스트'][-2] < param04:
-                log.info("이전 플로우 수익이 10틱 이하로 매매 진입 안합니다.")
+                log.info("이전 플로우 수익이 %s 이하로 매매 진입 안합니다.(param04)" % param04)
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
@@ -296,7 +302,7 @@ def is_it_OK(subject_code, current_price):
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit < 0:
             if subject.info[subject_code]['수익리스트'][-1] < param05:
-                log.info("맞틀틀틀일때 조건이 맞지 않아 진입 안합니다.")
+                log.info("맞틀틀틀일때 조건이 맞지 않아 진입 안합니다.(param05:%s)" % param05)
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
@@ -305,7 +311,7 @@ def is_it_OK(subject_code, current_price):
 
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
             if subject.info[subject_code]['수익리스트'][-1] > param01:
-                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다." % param01)
+                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
@@ -313,14 +319,14 @@ def is_it_OK(subject_code, current_price):
                 pass
 
 
-        elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
-            if mesu_medo_type == '신규매도':
-                mesu_medo_type = '신규매수'
-            elif mesu_medo_type == '신규매수':
-                mesu_medo_type = '신규매도'
-            log.info("[%s] 반대매매 조건이 맞아 반대 매매 진입합니다." % mesu_medo_type)
-            ma_line_is_true = True
-            subject.info[subject_code]['반대매매'] = True
+        # elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
+        #     if mesu_medo_type == '신규매도':
+        #         mesu_medo_type = '신규매수'
+        #     elif mesu_medo_type == '신규매수':
+        #         mesu_medo_type = '신규매도'
+        #     log.info("[%s] 반대매매 조건이 맞아 반대 매매 진입합니다." % mesu_medo_type)
+        #     ma_line_is_true = True
+        #     subject.info[subject_code]['반대매매'] = True
 
 
         else:
