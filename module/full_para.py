@@ -18,6 +18,7 @@ def is_it_OK(subject_code, current_price):
     mesu_medo_type = None
     false = {'신규주문': False}
     ma_line_is_true = True
+    time_check_is_true = True
     reverse_tic = subject.info[subject_code]['반대매매틱']
 
     # param01 = 46
@@ -34,6 +35,7 @@ def is_it_OK(subject_code, current_price):
     param05 = -11
     param06 = 40
     param07 = -10
+    param08 = -40
 
     # 300캔들이 없으면 매매 안함
     if calc.data[subject_code]['idx'] < 3000:
@@ -140,14 +142,19 @@ def is_it_OK(subject_code, current_price):
                 pass
 
         if subject.info[subject_code]['수익리스트'][-1] > param06:
-            log.info("지난 플로우 수익이 46틱 이상으로 진입 포기")
+            log.info("지난 플로우 수익이 %s틱 이상으로 진입 포기" % param06)
             return false
 
         if subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] > param07:
             log.info("이전 틀 플로우 수익이 -10틱 이상으로 매매 진입 안합니다.")
             return false
 
-        if subject.info[subject_code]['맞틀리스트'][-5:] == ['틀', '틀','틀', '틀', '틀']:
+        if subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] < param08:
+            time_check_is_true = False
+            log.info("큰 틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-5:] == ['틀', '틀','틀', '틀', '틀']:
             #if subject.info[subject_code]['수익리스트'][-2] < subject.info[subject_code]['수익리스트'][-1] and subject.info[subject_code]['수익리스트'][-2] < param02:
             #    log.info("틀틀틀틀일때 조건이 맞지 않아 진입 안합니다.")
             #    return false
@@ -239,10 +246,15 @@ def is_it_OK(subject_code, current_price):
             return false
 
         if profit < 0 and profit > param07:
-            log.info("이전 틀 플로우 수익이 -10틱 이상으로 매매 진입 안합니다.")
+            log.info("이전 틀 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param07)
             return false
 
-        if subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '틀'] and profit < 0:
+        if profit < param08:
+            time_check_is_true = False
+            log.info("큰 틀 다음으로 매매 진입합니다.")
+            pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '틀'] and profit < 0:
             #if subject.info[subject_code]['수익리스트'][-1] < profit and subject.info[subject_code]['수익리스트'][-1] < param02:
             #     log.info("틀틀틀틀일때 조건이 맞지 않아 진입 안합니다.(param02:%s)" % param02)
             #     calc.data[subject_code]['맞틀체크'] = True
@@ -261,7 +273,7 @@ def is_it_OK(subject_code, current_price):
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
             if profit > param03:
-                log.info("이전 플로우 수익이 10틱 이상으로 매매 진입 안합니다.")
+                log.info("이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param03)
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
@@ -333,7 +345,7 @@ def is_it_OK(subject_code, current_price):
 
     if d.get_mode() == d.REAL:  # 실제 투자 할때
         if subject_code[:3] == "GCG" or subject_code[:3] == "GCJ":
-            if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False:
+            if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False and time_check_is_true == True:
                 log.info("22:00~23:30 시 사이라 매매 포기 합니다.")
                 return false
             elif get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
@@ -341,7 +353,7 @@ def is_it_OK(subject_code, current_price):
                 log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
                 return false
         else:
-            if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False:
+            if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False and time_check_is_true == True:
                 log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
                 return false
             elif get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
@@ -350,11 +362,11 @@ def is_it_OK(subject_code, current_price):
                 return false
     else:
         if subject_code == "GCG18" or subject_code == "GCJ18":
-            if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False:
+            if get_time(0, subject_code) > 2200 and get_time(0, subject_code) < 2330 and subject.info[subject_code]['반대매매'] == False and time_check_is_true == True:
                 log.info("22:00~23:30 시 사이라 매매 포기 합니다.")
                 return false
         else:
-            if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False:
+            if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code]['반대매매'] == False and time_check_is_true == True:
                 log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
                 return false
         if get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
