@@ -27,11 +27,10 @@ def is_it_OK(subject_code, current_price):
     # param04 = -10
     # param05 = -10
 
-    param01 = 46
-    #param01 = 220
-    param02 = -16
+    param01 = 42
+    param02 = -16  #사용안함
     param03 = 10
-    param04 = -17
+    param04 = -16
     param05 = -11
     param06 = 40
     param07 = -10
