@@ -133,25 +133,22 @@ def is_it_OK(subject_code, current_price):
     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
             calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
 
-        if subject.info[subject_code]['맞틀리스트'][-2] == '맞' and subject.info[subject_code]['맞틀리스트'][-1] == '틀':
-            if subject.info[subject_code]['수익리스트'][-2] > param01:
-                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다." % param01)
-                return false
-            else:
-                pass
-
-        if subject.info[subject_code]['수익리스트'][-1] > param06:
-            log.info("지난 플로우 수익이 %s틱 이상으로 진입 포기" % param06)
-            return false
-
-        if subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] > param07:
-            log.info("이전 틀 플로우 수익이 -10틱 이상으로 매매 진입 안합니다.")
-            return false
-
         if subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] < param08:
             time_check_is_true = False
             log.info("큰 틀 다음으로 매매 진입합니다.")
             pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-2] == '맞' and subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-2] > param01:
+            log.info("지지난 플로우가 %s이상 수익으로 진입안합니다." % param01)
+            return false
+
+        elif subject.info[subject_code]['수익리스트'][-1] > param06:
+            log.info("지난 플로우 수익이 %s틱 이상으로 진입 포기" % param06)
+            return false
+
+        elif subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] > param07:
+            log.info("이전 틀 플로우 수익이 -10틱 이상으로 매매 진입 안합니다.")
+            return false
 
         elif subject.info[subject_code]['맞틀리스트'][-5:] == ['틀', '틀','틀', '틀', '틀']:
             #if subject.info[subject_code]['수익리스트'][-2] < subject.info[subject_code]['수익리스트'][-1] and subject.info[subject_code]['수익리스트'][-2] < param02:
@@ -232,26 +229,23 @@ def is_it_OK(subject_code, current_price):
 
     else:
 
-        if subject.info[subject_code]['맞틀리스트'][-1] == '맞' and profit < 0:
-            if subject.info[subject_code]['수익리스트'][-1] > param01:
-                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
-                calc.data[subject_code]['맞틀체크'] = True
-                return false
-            else:
-                pass
-        #
-        if profit > param06:
-            log.info("지난 플로우 수익이 %s틱 이상으로 진입 포기" % param06)
-            return false
-
-        if profit < 0 and profit > param07:
-            log.info("이전 틀 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param07)
-            return false
-
         if profit < param08:
             time_check_is_true = False
             log.info("큰 틀 다음으로 매매 진입합니다.")
             pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-1] == '맞' and profit < 0 and subject.info[subject_code]['수익리스트'][-1] > param01:
+            log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
+            calc.data[subject_code]['맞틀체크'] = True
+            return false
+
+        elif profit > param06:
+            log.info("지난 플로우 수익이 %s틱 이상으로 진입 포기" % param06)
+            return false
+
+        elif profit < 0 and profit > param07:
+            log.info("이전 틀 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param07)
+            return false
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '틀'] and profit < 0:
             #if subject.info[subject_code]['수익리스트'][-1] < profit and subject.info[subject_code]['수익리스트'][-1] < param02:
