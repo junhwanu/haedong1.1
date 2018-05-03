@@ -4,6 +4,10 @@ import define as d
 import log_result as res
 import math
 
+
+flow_candle_count = 0
+flow_candle_count_list = []
+
 data = {}
 data['이동평균선'] = {}
 #우리가 사용할 이동평균선의 일자를 설정
@@ -722,6 +726,9 @@ def init_sar(subject_code):
 
 def calculate_sar(subject_code):
 
+    global flow_candle_count, flow_candle_count_list
+    flow_candle_count = flow_candle_count + 1
+
     sar = subject.info[subject_code]['sar']
     af = subject.info[subject_code]['af']
     init_af = subject.info[subject_code]['init_af']
@@ -740,7 +747,7 @@ def calculate_sar(subject_code):
         the_lowest_price = ep 
 
     next_sar = temp_sar
-    
+
     if temp_flow == "상향":
         if data[subject_code]['저가'][index] >= next_sar: # 상승추세에서 저가가 내일의 SAR보다 높으면 하락이 유효
             today_sar = next_sar
@@ -775,7 +782,10 @@ def calculate_sar(subject_code):
                 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
                 result[result_arry] = result[result_arry] + profit_tic
-                
+
+                flow_candle_count_list.append(flow_candle_count)
+                flow_candle_count = 0
+                print(flow_candle_count_list)
                 #log.info(result)
             else:
                 subject.info[subject_code]['맞틀리스트'].append('맞')
@@ -786,7 +796,10 @@ def calculate_sar(subject_code):
                 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
                 result[result_arry] = result[result_arry] + profit_tic
-                
+
+                flow_candle_count_list.append(flow_candle_count)
+                flow_candle_count = 0
+                print(flow_candle_count_list)
                 #log.info(result)
 
             data[subject_code]['현재플로우최극가'] = float(data[subject_code]['저가'][-1])
@@ -839,7 +852,10 @@ def calculate_sar(subject_code):
 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
                 result[result_arry] = result[result_arry] + profit_tic                
-                
+
+                flow_candle_count_list.append(flow_candle_count)
+                flow_candle_count = 0
+                print(flow_candle_count_list)
                 #log.info(result)
             else:
 
@@ -850,7 +866,10 @@ def calculate_sar(subject_code):
 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
                 result[result_arry] = result[result_arry] + profit_tic
-                
+
+                flow_candle_count_list.append(flow_candle_count)
+                flow_candle_count = 0
+                print(flow_candle_count_list)
                 #log.info(result)
                 
             data[subject_code]['현재플로우최극가'] = float(data[subject_code]['고가'][-1])
