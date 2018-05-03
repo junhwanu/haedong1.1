@@ -130,6 +130,7 @@ def is_it_OK(subject_code, current_price):
 
         if calc.flow_candle_count_list[-1] <= param09:
             ma_line_is_true = True
+            log.info("지난 캔들이 140개 이하로 진입")
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] < param08:
@@ -230,6 +231,7 @@ def is_it_OK(subject_code, current_price):
 
         if calc.flow_candle_count <= param09:
             ma_line_is_true = True
+            log.info("지난 캔들이 140개 이하로 진입")
             pass
 
         elif profit < param08:
@@ -384,18 +386,18 @@ def is_it_OK(subject_code, current_price):
             contract_cnt = possible_contract_cnt
         log.info("매매 예정 수량은 %s개 입니다." % contract_cnt)
         if contract_cnt == 0:
-            contract_cnt = 2
+            contract_cnt = 1
         #
-        contract_cnt = 2
+        contract_cnt = 1
 
 
     else:
         contract_cnt = 2  # 테스트 돌릴때
 
-    if contract_cnt > 1:
-        subject.info[subject_code]['신규매매수량'] = contract_cnt
-    elif contract_cnt == 1:
-        subject.info[subject_code]['신규매매수량'] = 2
+    # if contract_cnt > 1:
+    #     subject.info[subject_code]['신규매매수량'] = contract_cnt
+    # elif contract_cnt == 1:
+    #     subject.info[subject_code]['신규매매수량'] = 2
 
     # heejun add `17.8.16
     number_of_current_contract = int(contract.get_contract_count(subject_code))
