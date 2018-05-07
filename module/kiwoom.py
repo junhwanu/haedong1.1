@@ -307,11 +307,8 @@ class api():
         """ Quit the server """
         print("qutie()")
         QApplication.quit()
-        sys.exit(0)
-        #self.health_server_thread.server_close()
-        #sys.exit(0)
-
-        ####################################################
+        print("system exit")
+        sys.exit()
 
     # Control Event Handlers
     ####################################################
@@ -956,10 +953,6 @@ class api():
             if d.get_mode() == d.REAL:
                 self.get_my_deposit_info()
 
-            if subject.info[order_info['종목코드']]['이상신호'] == True:
-                log.info(str(order_info['종목코드']) + "종목 이상신호에 대한 체결로 무시")
-                return
-
             log.info(order_info)
             res.info(order_info)
             order_info['체결표시가격'] = round(float(order_info['체결표시가격']), subject.info[order_info['종목코드']]['자릿수'])
@@ -1137,9 +1130,7 @@ class api():
 
             # 신규매매
             if add_cnt > 0:
-                if d.get_mode() == d.REAL:
-                    # self.insert_jango_to_db(order_info)
-                    pass
+
                 rtn = contract.add_contract(order_info, subject.info[subject_code]['주문내용'])
 
                 if rtn == False:
@@ -1211,21 +1202,10 @@ class api():
             #        # gmail.send_email('[긴급' + str(c_time) + '] 해동이 작동 중지', '에러코드')
             #        notification.sendMessage("긴급! 해동이 작동 중지!", self.account)
 
-
-                # 자동이 재시작 로직 작성
-            #    pass
-
-            try:
-                # self.health_server_thread.server.shutdown()
-                self.health_server_thread.server_close()
-                log.info("헬스 체크서버 종료")
-                #raise SystemExit
-                self.quit()
-            except Exception as err:
-                log.error(err)
-                self.quit()
-
+            log.info("헬스 체크서버 종료")
+            self.health_server_thread.server_close()
             self.quit()
+            sys.exit()
 
     ####################################################
     # Custom Methods
