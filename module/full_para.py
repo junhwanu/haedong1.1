@@ -394,6 +394,7 @@ def is_it_OK(subject_code, current_price):
 
     else:
         contract_cnt = 2  # 테스트 돌릴때
+        subject.info[subject_code]['신규매매수량'] = contract_cnt
 
     # if contract_cnt > 1:
     #     subject.info[subject_code]['신규매매수량'] = contract_cnt
