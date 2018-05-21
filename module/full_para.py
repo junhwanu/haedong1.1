@@ -324,7 +324,6 @@ def is_it_OK(subject_code, current_price):
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
             if subject.info[subject_code]['수익리스트'][-1] > param01:
                 log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
-                #calc.data[subject_code]['맞틀체크'] = True
                 return false
             else:
                 log.info("틀맞틀 다음으로 매매 진입합니다.")
@@ -346,9 +345,9 @@ def is_it_OK(subject_code, current_price):
 
     if ma_line_is_true == False: return false
 
-    if get_time(0, subject_code) == int(subject.info[subject_code]['시작시간']) or get_time(0, subject_code) == int(
-            subject.info[subject_code]['마감시간']):
+    if get_time(0, subject_code) <= int(subject.info[subject_code]['시작시간']) and get_time(0, subject_code) >= int(subject.info[subject_code]['마감시간']):
         log.info("장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
+        #calc.data[subject_code]['맞틀체크'] = True
         return false
 
     if subject_code[:3] == "GCZ":
@@ -521,8 +520,9 @@ def is_it_sell(subject_code, current_price):
                         subject.info[subject_code]['신규매매수량']:
                     if contract.list[subject_code]['손절가'] < current_price - first_chungsan_dribble * \
                             subject.info[subject_code]['단위']:
-                        contract.list[subject_code]['손절가'] = current_price - first_chungsan_dribble * \
-                                                             subject.info[subject_code]['단위']
+                        contract.list[subject_code]['손절가'] = current_price - first_chungsan_dribble * subject.info[subject_code]['단위']
+                        contract.list[subject_code]['손절가'] = round(contract.list[subject_code]['손절가'],subject.info[subject_code]['자릿수'])
+
                         res.info("1차 청산 드리블 중 %s, 현재가: %s ,시간: %s" % (contract.list[subject_code]['손절가'], current_price,
                                                                       str(calc.data[subject_code]['체결시간'][-1])[8:14]))
                         log.info("1차 청산 드리블 중 %s, 현재가: %s, 시간: %s" % (contract.list[subject_code]['손절가'], current_price,
@@ -532,8 +532,8 @@ def is_it_sell(subject_code, current_price):
                     subject.info[subject_code]['신규매매수량'] - int(subject.info[subject_code]['신규매매수량'] / 2)):
                     if contract.list[subject_code]['손절가'] < current_price - second_chungsan_dribble * \
                             subject.info[subject_code]['단위']:
-                        contract.list[subject_code]['손절가'] = current_price - second_chungsan_dribble * \
-                                                             subject.info[subject_code]['단위']
+                        contract.list[subject_code]['손절가'] = current_price - second_chungsan_dribble * subject.info[subject_code]['단위']
+
                         res.info("2차 청산 드리블 중 %s" % contract.list[subject_code]['손절가'])
                         log.info("2차 청산 드리블 중 %s" % contract.list[subject_code]['손절가'])
                         # return {'신규주문':True, '매도수구분':'신규매도', '수량':int((contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][contract.DRIBBLE]+1)/2)}
@@ -628,6 +628,7 @@ def is_it_sell(subject_code, current_price):
                             subject.info[subject_code]['단위']:
                         contract.list[subject_code]['손절가'] = current_price + first_chungsan_dribble * \
                                                              subject.info[subject_code]['단위']
+                        contract.list[subject_code]['손절가'] = round(contract.list[subject_code]['손절가'], subject.info[subject_code]['자릿수'])
                         res.info("1차 청산 드리블 중 %s, 현재가: %s ,시간: %s" % (contract.list[subject_code]['손절가'], current_price,
                                                                       str(calc.data[subject_code]['체결시간'][-1])[8:14]))
                         log.info("1차 청산 드리블 중 %s, 현재가: %s, 시간: %s" % (contract.list[subject_code]['손절가'], current_price,
