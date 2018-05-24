@@ -156,6 +156,20 @@ def is_sorted(subject_code):
     elif reverse_lst == org_lst: return '상승세'
     else: return '모름'
 
+def is_sorted_previous(subject_code):
+    org_lst = []
+    for days in subject.info[subject_code]['이동평균선']:
+        org_lst.append(calc.data[subject_code]['이동평균선'][days][-2])
+
+    sort_lst = org_lst[:]
+    sort_lst.sort()
+    reverse_lst = sort_lst[:]
+    reverse_lst.reverse()
+
+    if sort_lst == org_lst: return '하락세'
+    elif reverse_lst == org_lst: return '상승세'
+    else: return '모름'
+
 def get_today_date():
     today = datetime.date.today()
     year = str(today.year)

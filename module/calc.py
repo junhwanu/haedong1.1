@@ -11,12 +11,12 @@ flow_candle_count_list = []
 data = {}
 data['이동평균선'] = {}
 #우리가 사용할 이동평균선의 일자를 설정
-data['이동평균선']['일수'] = [20, 30, 118, 122]
+data['이동평균선']['일수'] = [20, 122]
 
 data_day = {}
 data_day['이동평균선'] = {}
 #우리가 사용할 이동평균선의 일자를 설정
-data_day['이동평균선']['일수'] = [20, 30, 118, 122]
+data_day['이동평균선']['일수'] = [20, 122]
 
 result = {}
 result['틀맞틀맞'] = 0
@@ -777,7 +777,7 @@ def calculate_sar(subject_code):
             if data[subject_code]['이전반전시SAR값'][-2] - next_sar > 0:
                 subject.info[subject_code]['맞틀리스트'].append('틀')
                 profit_tic = (next_sar - data[subject_code]['이전반전시SAR값'][-2]) / subject.info[subject_code]['단위']
-                profit_tic = round(profit_tic,1)
+                profit_tic = round(profit_tic, subject.info[subject_code]['자릿수'])
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
                 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
@@ -791,7 +791,7 @@ def calculate_sar(subject_code):
                 subject.info[subject_code]['맞틀리스트'].append('맞')
                 #print(subject.info[subject_code]['맞틀리스트'])
                 profit_tic = (next_sar - data[subject_code]['이전반전시SAR값'][-2])/subject.info[subject_code]['단위']
-                profit_tic = round(profit_tic, 1)
+                profit_tic = round(profit_tic, subject.info[subject_code]['자릿수'])
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
                 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
@@ -847,7 +847,7 @@ def calculate_sar(subject_code):
                 subject.info[subject_code]['맞틀리스트'].append('맞')
 
                 profit_tic = (data[subject_code]['이전반전시SAR값'][-2] - next_sar)/subject.info[subject_code]['단위']
-                profit_tic = round(profit_tic, 1)
+                profit_tic = round(profit_tic, subject.info[subject_code]['자릿수'])
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
 
                 result_arry = subject.info[subject_code]['맞틀리스트'][-5]+subject.info[subject_code]['맞틀리스트'][-4]+subject.info[subject_code]['맞틀리스트'][-3]+subject.info[subject_code]['맞틀리스트'][-2]
@@ -860,7 +860,7 @@ def calculate_sar(subject_code):
             else:
 
                 profit_tic = (data[subject_code]['이전반전시SAR값'][-2] - next_sar) / subject.info[subject_code]['단위']
-                profit_tic = round(profit_tic, 1)
+                profit_tic = round(profit_tic, subject.info[subject_code]['자릿수'])
                 subject.info[subject_code]['수익리스트'].append(profit_tic)
                 subject.info[subject_code]['맞틀리스트'].append('틀')
 
