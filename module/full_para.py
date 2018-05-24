@@ -22,9 +22,9 @@ def is_it_OK(subject_code, current_price):
     reverse_tic = subject.info[subject_code]['반대매매틱']
 
     param01 = 160
-    param02 = -16  # 사용안함
+    param02 = 560
     param03 = 10
-    param04 = -16  # 사용안함
+    param04 = 720
     param05 = -16  #-24
     param06 = 40
     param07 = -10  # 사용안함
@@ -212,8 +212,11 @@ def is_it_OK(subject_code, current_price):
         #    pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '맞', '맞']:
-            log.info("틀틀맞맞 다음으로 매매 진입합니다.")
-            pass
+            if calc.flow_candle_count_list[-2] > param02 and calc.flow_candle_count_list[-1] < param04:
+                log.info("틀틀맞맞 일때 조건이 맞지 않아 매매 안합니다.")
+                return false
+            else:
+                log.info("틀틀맞맞 다음으로 매매 진입합니다.")
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '틀', '틀']:
             #if subject.info[subject_code]['수익리스트'][-4] < subject.info[subject_code]['수익리스트'][-3]:
@@ -321,8 +324,11 @@ def is_it_OK(subject_code, current_price):
         #    pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '맞'] and profit > 0:
-            log.info("틀틀맞맞 다음으로 매매 진입합니다.")
-            pass
+            if calc.flow_candle_count_list[-1] > param02 and calc.flow_candle_count < param04:
+                log.info("틀틀맞맞 일때 조건이 맞지 않아 매매 안합니다.")
+                return false
+            else:
+                log.info("틀틀맞맞 다음으로 매매 진입합니다.")
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '틀'] and profit < 0:
             #if subject.info[subject_code]['수익리스트'][-3] < subject.info[subject_code]['수익리스트'][-2]:
