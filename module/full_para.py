@@ -21,7 +21,7 @@ def is_it_OK(subject_code, current_price):
     time_check_is_true = True
     reverse_tic = subject.info[subject_code]['반대매매틱']
 
-    param01 = 42
+    param01 = 160
     param02 = -16  # 사용안함
     param03 = 10
     param04 = -16  # 사용안함
@@ -30,6 +30,7 @@ def is_it_OK(subject_code, current_price):
     param07 = -10  # 사용안함
     param08 = -40
     param09 = 140
+    param10 = 200
 
     #log.info("full_para.py is_it_ok()")
 
@@ -130,6 +131,16 @@ def is_it_OK(subject_code, current_price):
     if len(calc.data[subject_code]['SAR반전시간']) > 0 and calc.data[subject_code]['SAR반전시간'][-1] == \
             calc.data[subject_code]['체결시간'][-1]:  # 반전 후 SAR로 갱신되었다면
 
+        if mesu_medo_type == '신규매도':
+            if my_util.is_sorted_previous(subject_code) != '하락세':
+                ma_line_is_true = False
+        elif mesu_medo_type == '신규매수':
+            if my_util.is_sorted_previous(subject_code) != '상승세':
+                ma_line_is_true = False
+
+        calc.data[subject_code]['맞틀체크'] = True
+        calc.flow_candle_count_list[-1] = calc.flow_candle_count_list[-1] - 1
+
         if calc.flow_candle_count_list[-1] <= param09:
             ma_line_is_true = True
             log.info("지난 캔들이 140개 이하로 진입")
@@ -145,9 +156,16 @@ def is_it_OK(subject_code, current_price):
             calc.data[subject_code]['맞틀체크'] = True
             return false
 
-        elif subject.info[subject_code]['맞틀리스트'][-2] == '맞' and subject.info[subject_code]['맞틀리스트'][-1] == '틀' and \
-                subject.info[subject_code]['수익리스트'][-2] > param01:
-            log.info("지지난 플로우가 %s이상 수익으로 진입안합니다." % param01)
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
+            if calc.flow_candle_count_list[-1] <= param01:
+                log.info("틀맞틀 로 매매 진입합니다.")
+            else:
+                log.info("틀맞틀일때 지난 플로우 캔들 수가 %s(현재 %s) 이상으로 매매 안합니다" % (param01, calc.flow_candle_count_list[-1]))
+                calc.data[subject_code]['맞틀체크'] = True
+                return false
+
+        elif subject.info[subject_code]['맞틀리스트'][-2] == '맞' and subject.info[subject_code]['맞틀리스트'][-1] == '틀':
+            log.info("맞틀 로 매매 포기")
             calc.data[subject_code]['맞틀체크'] = True
             return false
 
@@ -164,9 +182,9 @@ def is_it_OK(subject_code, current_price):
                 log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
                 pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '맞', '틀']:
-            log.info("틀맞맞틀 다음으로 매매 진입합니다.")
-            pass
+        #elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '맞', '틀']:
+        #    log.info("틀맞맞틀 다음으로 매매 진입합니다.")
+        #    pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '틀', '틀']:
             if subject.info[subject_code]['수익리스트'][-2] < param05:
@@ -189,16 +207,17 @@ def is_it_OK(subject_code, current_price):
             log.info("틀틀틀맞 다음으로 매매 진입합니다.")
             pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '맞', '틀']:
-            log.info("맞맞맞틀 다음으로 매매 진입합니다.")
-            pass
+        #elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '맞', '틀']:
+        #    log.info("맞맞맞틀 다음으로 매매 진입합니다.")
+        #    pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '맞', '맞']:
             log.info("틀틀맞맞 다음으로 매매 진입합니다.")
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '틀', '틀']:
-            if subject.info[subject_code]['수익리스트'][-4] < subject.info[subject_code]['수익리스트'][-3]:
+            #if subject.info[subject_code]['수익리스트'][-4] < subject.info[subject_code]['수익리스트'][-3]:
+            if calc.flow_candle_count_list[-2] > param10:
                 log.info("맞맞틀틀일때 조건이 맞지 않아 진입 안합니다.")
                 calc.data[subject_code]['맞틀체크'] = True
                 return false
@@ -213,15 +232,6 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀틀틀 다음으로 매매 진입합니다.")
-                pass
-
-        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
-            if subject.info[subject_code]['수익리스트'][-2] > param01:
-                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다." % param01)
-                calc.data[subject_code]['맞틀체크'] = True
-                return false
-            else:
-                log.info("틀맞틀 다음으로 매매 진입합니다.")
                 pass
 
         # elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '맞'] and profit > reverse_tic:
@@ -240,6 +250,8 @@ def is_it_OK(subject_code, current_price):
 
     else:
 
+        calc.data[subject_code]['맞틀체크'] = True
+
         if calc.flow_candle_count <= param09:
             ma_line_is_true = True
             log.info("지난 캔들이 140개 이하로 진입")
@@ -254,8 +266,15 @@ def is_it_OK(subject_code, current_price):
             log.info("지난 플로우 수익이 %s틱 이상으로 진입 포기" % param06)
             return false
 
-        elif subject.info[subject_code]['맞틀리스트'][-1] == '맞' and profit < 0 and subject.info[subject_code]['수익리스트'][-1] > param01:
-            log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
+        elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
+            if calc.flow_candle_count <= param01:
+                log.info("틀맞틀 로 매매 진입합니다.")
+            else:
+                log.info("틀맞틀일때 지난 플로우 캔들 수가 %s(현재 %s) 이상으로 매매 안합니다" % (param01, calc.flow_candle_count))
+                return false
+
+        elif subject.info[subject_code]['맞틀리스트'][-1] == '맞' and profit < 0:
+            log.info("맞틀 로 매매 포기")
             return false
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '틀'] and profit < 0:
@@ -271,9 +290,9 @@ def is_it_OK(subject_code, current_price):
                 log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
                 pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞'] and profit < 0:
-            log.info("틀맞맞틀 다음으로 매매 진입합니다.")
-            pass
+        #elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞'] and profit < 0:
+        #    log.info("틀맞맞틀 다음으로 매매 진입합니다.")
+        #    pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀'] and profit < 0:
             if subject.info[subject_code]['수익리스트'][-1] < param05:
@@ -297,16 +316,17 @@ def is_it_OK(subject_code, current_price):
             pass
 
 
-        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '맞'] and profit < 0:
-            log.info("맞맞맞틀 다음으로 매매 진입합니다.")
-            pass
+        #elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '맞'] and profit < 0:
+        #    log.info("맞맞맞틀 다음으로 매매 진입합니다.")
+        #    pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '맞'] and profit > 0:
             log.info("틀틀맞맞 다음으로 매매 진입합니다.")
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '틀'] and profit < 0:
-            if subject.info[subject_code]['수익리스트'][-3] < subject.info[subject_code]['수익리스트'][-2]:
+            #if subject.info[subject_code]['수익리스트'][-3] < subject.info[subject_code]['수익리스트'][-2]:
+            if calc.flow_candle_count_list[-1] > param10:
                 log.info("맞맞틀틀일때 조건이 맞지 않아 진입 안합니다.")
                 return false
             else:
@@ -320,15 +340,6 @@ def is_it_OK(subject_code, current_price):
             else:
                 log.info("맞틀틀틀 다음으로 매매 진입합니다.")
                 pass
-
-        elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
-            if subject.info[subject_code]['수익리스트'][-1] > param01:
-                log.info("지지난 플로우가 %s이상 수익으로 진입안합니다.(param01)" % param01)
-                return false
-            else:
-                log.info("틀맞틀 다음으로 매매 진입합니다.")
-                pass
-
 
         # elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
         #     if mesu_medo_type == '신규매도':
