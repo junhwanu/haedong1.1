@@ -31,6 +31,7 @@ def is_it_OK(subject_code, current_price):
     param08 = -40
     param09 = 115 #140
     param10 = 200
+    param11 = 30
 
 
     #log.info("full_para.py is_it_ok()")
@@ -142,7 +143,11 @@ def is_it_OK(subject_code, current_price):
         calc.data[subject_code]['맞틀체크'] = True
         calc.flow_candle_count_list[-1] = calc.flow_candle_count_list[-1] - 1
 
-        if calc.flow_candle_count_list[-1] <= param09:
+        if calc.flow_candle_count_list[-1] <= param11:
+            log.info("지난 캔들이 %s개 미만으로 진입 포기" % param11)
+            return false
+
+        elif calc.flow_candle_count_list[-1] <= param09:
             ma_line_is_true = True
             log.info("지난 캔들이 140개 이하로 진입")
             pass
@@ -260,7 +265,11 @@ def is_it_OK(subject_code, current_price):
 
         calc.data[subject_code]['맞틀체크'] = True
 
-        if calc.flow_candle_count <= param09:
+        if calc.flow_candle_count < param11:
+            log.info("지난 캔들이 %s개 미만으로 진입 포기" % param11)
+            return false
+
+        elif calc.flow_candle_count <= param09:
             ma_line_is_true = True
             log.info("지난 캔들이 140개 이하로 진입")
             pass
