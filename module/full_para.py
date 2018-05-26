@@ -27,10 +27,11 @@ def is_it_OK(subject_code, current_price):
     param04 = 720
     param05 = -16  #-24
     param06 = 40
-    param07 = -10  # 사용안함
+    param07 = 20
     param08 = -40
-    param09 = 140
+    param09 = 115 #140
     param10 = 200
+
 
     #log.info("full_para.py is_it_ok()")
 
@@ -182,32 +183,36 @@ def is_it_OK(subject_code, current_price):
                 log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
                 pass
 
-        #elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '맞', '틀']:
+        #elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '맞', '틀']:#중복
         #    log.info("틀맞맞틀 다음으로 매매 진입합니다.")
         #    pass
-
-        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '틀', '틀']:
-            if subject.info[subject_code]['수익리스트'][-2] < param05:
-                log.info("틀맞틀틀 일때 조건이 맞지 않아 진입 안합니다.")
-                calc.data[subject_code]['맞틀체크'] = True
-                return false
-            else:
-                log.info("틀맞틀틀 다음으로 매매 진입합니다.")
-                pass
+        #
+        # elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '틀', '틀']: #수익 안나서 뺌
+        #     if subject.info[subject_code]['수익리스트'][-2] < param05:
+        #         log.info("틀맞틀틀 일때 조건이 맞지 않아 진입 안합니다.")
+        #         calc.data[subject_code]['맞틀체크'] = True
+        #         return false
+        #     else:
+        #         log.info("틀맞틀틀 다음으로 매매 진입합니다.")
+        #         pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '맞']:
             if subject.info[subject_code]['수익리스트'][-1] > param03:
-                log.info("이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param03)
+                log.info("맞틀틀맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param03)
                 return false
             else:
                 log.info("맞틀틀맞 다음으로 매매 진입합니다.")
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '맞']:
-            log.info("틀틀틀맞 다음으로 매매 진입합니다.")
-            pass
+            if subject.info[subject_code]['수익리스트'][-1] > param07:
+                log.info("틀틀틀맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param07)
+                return false
+            else:
+                log.info("틀틀틀맞 다음으로 매매 진입합니다.")
+                pass
 
-        #elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '맞', '틀']:
+        #elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '맞', '맞', '틀']: #중복
         #    log.info("맞맞맞틀 다음으로 매매 진입합니다.")
         #    pass
 
@@ -293,33 +298,36 @@ def is_it_OK(subject_code, current_price):
                 log.info("맞틀틀틀틀 다음으로 매매 진입합니다.")
                 pass
 
-        #elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞'] and profit < 0:
+        #elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞'] and profit < 0: #중복
         #    log.info("틀맞맞틀 다음으로 매매 진입합니다.")
         #    pass
 
-        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀'] and profit < 0:
-            if subject.info[subject_code]['수익리스트'][-1] < param05:
-                log.info("틀맞틀틀 일때 조건이 맞지 않아 진입 안합니다.(param05:%s)" % param05)
-                #calc.data[subject_code]['맞틀체크'] = True
-                return false
-            else:
-                log.info("틀맞틀틀 다음으로 매매 진입합니다.")
-                pass
+        # elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀'] and profit < 0: #수익 안나서 뺌
+        #     if subject.info[subject_code]['수익리스트'][-1] < param05:
+        #         log.info("틀맞틀틀 일때 조건이 맞지 않아 진입 안합니다.(param05:%s)" % param05)
+        #         #calc.data[subject_code]['맞틀체크'] = True
+        #         return false
+        #     else:
+        #         log.info("틀맞틀틀 다음으로 매매 진입합니다.")
+        #         pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
             if profit > param03:
-                log.info("이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param03)
+                log.info("맞틀틀맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param03)
                 return false
             else:
                 log.info("맞틀틀맞 다음으로 매매 진입합니다.")
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit > 0:
-            log.info("틀틀틀맞 다음으로 매매 진입합니다.")
-            pass
+            if profit > param07:
+                log.info("틀틀틀맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param07)
+                return false
+            else:
+                log.info("틀틀틀맞 다음으로 매매 진입합니다.")
+                pass
 
-
-        #elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '맞'] and profit < 0:
+        #elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '맞', '맞'] and profit < 0: #중복
         #    log.info("맞맞맞틀 다음으로 매매 진입합니다.")
         #    pass
 
