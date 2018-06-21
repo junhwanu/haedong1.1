@@ -32,6 +32,8 @@ def is_it_OK(subject_code, current_price):
     param09 = 115 #140
     param10 = 200
     param11 = 30
+    param12 = 35
+    param13 = 20
 
 
     #log.info("full_para.py is_it_ok()")
@@ -141,7 +143,7 @@ def is_it_OK(subject_code, current_price):
                 ma_line_is_true = False
 
         calc.data[subject_code]['맞틀체크'] = True
-        calc.flow_candle_count_list[-1] = calc.flow_candle_count_list[-1] - 1
+        #calc.flow_candle_count_list[-1] = calc.flow_candle_count_list[-1] - 1
 
         if calc.flow_candle_count_list[-1] <= param11:
             log.info("지난 캔들이 %s개 미만으로 진입 포기" % param11)
@@ -200,6 +202,22 @@ def is_it_OK(subject_code, current_price):
         #     else:
         #         log.info("틀맞틀틀 다음으로 매매 진입합니다.")
         #         pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '맞', '맞', '맞']:
+            if subject.info[subject_code]['수익리스트'][-1] > param12:
+                log.info("틀틀틀맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param12)
+                return false
+            else:
+                log.info("틀틀틀맞 다음으로 매매 진입합니다.")
+                pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '맞', '맞']:
+            if subject.info[subject_code]['수익리스트'][-2] > param13:
+                log.info("맞틀맞맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param13)
+                return false
+            else:
+                log.info("맞틀맞맞 다음으로 매매 진입합니다.")
+                pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '맞']:
             if subject.info[subject_code]['수익리스트'][-1] > param03:
@@ -320,6 +338,22 @@ def is_it_OK(subject_code, current_price):
         #         log.info("틀맞틀틀 다음으로 매매 진입합니다.")
         #         pass
 
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '맞'] and profit > 0:
+            if profit > param12:
+                log.info("틀맞맞맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param12)
+                return false
+            else:
+                log.info("틀맞맞맞 다음으로 매매 진입합니다.")
+                pass
+
+        elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '맞'] and profit > 0:
+            if subject.info[subject_code]['수익리스트'][-1] > param13:
+                log.info("맞틀맞맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param13)
+                return false
+            else:
+                log.info("맞틀맞맞 다음으로 매매 진입합니다.")
+                pass
+
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
             if profit > param03:
                 log.info("맞틀틀맞 일때 이전 플로우 수익이 %s틱 이상으로 매매 진입 안합니다." % param03)
@@ -384,7 +418,7 @@ def is_it_OK(subject_code, current_price):
         #calc.data[subject_code]['맞틀체크'] = True
         return false
 
-    if subject_code[:3] == "GCZ":
+    if subject_code[:3] == "GCZ" or subject_code[:3] == "GCQ":
         if get_time(0, subject_code) > 2100 and get_time(0, subject_code) < 2230 and subject.info[subject_code][
             '반대매매'] == False and time_check_is_true == True:
             log.info("21:00~22:30 시 사이라 매매 포기 합니다.")
@@ -533,6 +567,7 @@ def is_it_sell(subject_code, current_price):
                         subject.info[subject_code]['반대매매'] == False \
                         and subject.info[subject_code]['sar'] > current_price:
                     res.info("청산 타이밍 한번 놓쳤습니다.")
+                    subject.info[subject_code]['체결미스'] = True
                     res.info("하향 반전되어 " + str(
                         contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][
                             contract.DRIBBLE]) + "개 청산 요청. 현재가:%s" % current_price)
@@ -640,6 +675,7 @@ def is_it_sell(subject_code, current_price):
                         subject.info[subject_code]['반대매매'] == False \
                         and subject.info[subject_code]['sar'] < current_price:
                     res.info("청산 타이밍 한번 놓쳤습니다.")
+                    subject.info[subject_code]['체결미스'] = True
                     res.info("상향 반전되어 " + str(
                         contract.list[subject_code]['계약타입'][contract.SAFE] + contract.list[subject_code]['계약타입'][
                             contract.DRIBBLE]) + "개 청산 요청. 현재가:%s" % current_price)

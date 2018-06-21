@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, reverse_only
+import log, calc, santa, screen, tester, full_para, contract, reverse_only, post_full_para
 import auto_login
 import define as d
-import json
-import math
 import subject
 import my_util
 import log_result as res
-import jango
 import notification
-import ns
+
 
 from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
-import db
+
 import health_server
 
 
@@ -850,10 +847,11 @@ class api():
                     order_contents = None
 
                     if subject.info[subject_code]['전략'] == '풀파라':
-                        if not calc.data[subject_code]['맞틀체크']:
+                        if subject.info[subject_code]['체결미스'] == True:
+                            order_contents = post_full_para.is_it_OK(subject_code, current_price)
+                        elif not calc.data[subject_code]['맞틀체크']:
                             order_contents = full_para.is_it_OK(subject_code, current_price)
                         else: order_contents = {'신규주문':False}
-
 
                     elif subject.info[subject_code]['전략'] == '리버스온리':
                         order_contents = reverse_only.is_it_OK(subject_code, current_price)
@@ -1114,7 +1112,7 @@ class api():
             log.critical(err_msg)
 
 
-            if int(c_time) >= int(subject.info[subject_code]['시작시간']) or int(c_time) < int(subject.info[subject_code]['마감시간']):
+            if int(c_time) < 600 and int(c_time) > 700:
                # 메일 발송
                if d.get_mode() == d.REAL:
                    notification.sendMessage("긴급! 해동이 작동 중지!", self.account)
