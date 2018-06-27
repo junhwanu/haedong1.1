@@ -15,4 +15,4 @@ if '%errorlevel%' NEQ '0' (
 
 :gotAdmin
 
-python C:\Haedong\Haedong.py 1
+python C:\Users\Administrator\PycharmProjects\haedong1.1\Haedong.py 1

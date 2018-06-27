@@ -56,7 +56,8 @@ class HealthConnectManager(threading.Thread):
     def server_close(self):
         if self.server is not None:
             self.server.shutdown()
-        #sys.exit()
+            sys.exit(-1)
+
 
 if __name__ == '__main__':
     # Example code
