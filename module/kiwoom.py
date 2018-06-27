@@ -63,7 +63,7 @@ class api():
             self.timestamp = time.time()
 
             if self.connect() == 0:
-                # auto_login.init()
+                #auto_login.init()
                 self.app.exec_()
 
 
@@ -727,11 +727,11 @@ class api():
                         calc.push(subject_code, subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
 
                         #log.info("캔들 추가, 체결시간: " + str(current_time))
-                        log.info("캔들 정보: %s" % subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
+                        #log.info("캔들 정보: %s" % subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
                         log.info("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code][
                             'flow'] + " \n SAR : " + str(
                             subject.info[subject_code]['sar']) + ", 보유계약:" + str(contract.get_contract_count(subject_code)))
-                        log.info("subject.info[subject_code]['신규매매수량']: %s" % subject.info[subject_code]['신규매매수량'])
+                        log.info("subject.info[subject_code]['신규매매수량']: %s, 1차청산틱: %s" % (subject.info[subject_code]['신규매매수량'], subject.info[subject_code]['1차청산틱']))
 
                         '''
                         if subject.info[subject_code]['flow'] == '상향': 
@@ -1194,8 +1194,6 @@ class api():
             contract.delete_contract(subject_code)
             subject.info[subject_code]['상태'] = '중립대기'
             if subject.info[subject_code]['전략'] == '큰파라': subject.info[subject_code]['상태'] = '매매완료'
-
-            subject.info[subject_code]['이상신호'] = False
 
     def set_jango_from_db(self):
         for subject_code in subject.info.keys():
