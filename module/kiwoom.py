@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
-import gmail, log, calc, santa, screen, para, tester, bol, trend_band, big_para, full_para, contract, mathirtyhundred, reverse_only
+import log, calc, santa, screen, tester, full_para, contract, reverse_only, post_full_para
 import auto_login
 import define as d
-import json
-import math
 import subject
 import my_util
 import log_result as res
-import jango
 import notification
-import ns
+
 
 from PyQt5.QAxContainer import QAxWidget
 from PyQt5.QtWidgets import QApplication
-import db
+
 import health_server
 
 
@@ -333,7 +330,8 @@ class api():
         if sRQName == '미결제잔고내역조회':
             if self.state == '매매가능': return
             if self.state == '대기':
-                notification.sendMessage("해동이 정상 시작되었습니다.", self.account)
+                #notification.sendMessage("해동이 정상 시작되었습니다.", self.account)
+                res.info("해동이 정상 시작되었습니다.")
 
                 # health server run
                 self.health_server_thread = health_server.HealthConnectManager()
@@ -585,7 +583,7 @@ class api():
 
                         if d.get_mode() == d.REAL:
                             if calc.data[subject_code]['idx'] > 9000:
-                                log.info("캔들 추가, 체결시간: " + self.recent_candle_time[subject_code])
+                                #log.info("캔들 추가, 체결시간: " + self.recent_candle_time[subject_code])
                                 log.info("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code][
                                     'flow'] + " / SAR : " + str(
                                     subject.info[subject_code]['sar']) + " / 추세 : " + my_util.is_sorted(
@@ -606,16 +604,22 @@ class api():
                     subject.info[subject_code] = subject.info[subject_symbol]
                     del subject.info[subject_symbol]
 
+                    if subject_code[:3] == "GCM" or subject_code[:3] == "GCQ" or subject_code[:3] == "GCZ":
+                        subject.info[subject_code]['시작시간'] = "0700"
+                        subject.info[subject_code]['마감시간'] = "0555"
+                        log.info("장 시작시간 7시, 종료시간 6시로 조정")
+
+                    elif subject_code[:3] == "GCJ" or subject_code[:3] == "GCG":
+                        subject.info[subject_code]['시작시간'] = "0800"
+                        subject.info[subject_code]['마감시간'] = "0655"
+                        log.info("장 시작시간 8시, 종료시간 7시로 조정")
+
                     # 초기 데이터 요청
                     if subject.info[subject_code]['전략'] == '일봉매매':
 
                         self.request_day_info(subject_code, "")
                         time.sleep(0.3)
-                    elif subject.info[subject_code]['전략'] == '남용T':
-                        # self.request_day_info(subject_code, "")
-                        # time.sleep(0.3)
-                        self.request_tick_info(subject_code, subject.info[subject_code]["시간단위"], "")
-                        time.sleep(0.3)
+
                     else:
                         self.request_tick_info(subject_code, subject.info[subject_code]["시간단위"], "")
                         time.sleep(0.3)
@@ -652,36 +656,40 @@ class api():
         :param subject_code: 종목코드
         :param sRealType: 리얼타입
         :param sRealData: 실시간 데이터전문
-        """
+        # """
 
-        current_timestamp = time.time()
-        if self.timestamp != None and self.timestamp + 2 < current_timestamp and self.state == '대기':
-            self.timestamp = time.time()
-            self.get_jango_list()
-            self.get_my_deposit_info()
-            try:
-                recent_trade_cnt = 2
-                # recent_trade_cnt = int((db.get_recent_trade_count(self.account))[0][0])
-                contract.recent_trade_cnt = recent_trade_cnt
-                if subject_code in subject.info.keys():
-                    subject.info[subject_code]['신규매매수량'] = recent_trade_cnt
-            except Exception as err:
-                log.error("kw:525, " + err)
 
         # log.debug("OnReceiveRealData entered.")
         #print("%s %s" % (subject_code, sRealType))
         if subject_code not in subject.info.keys() and d.get_mode() == d.REAL:  # 정의 하지 않은 종목이 실시간 데이터 들어오는 경우 실시간 해제
-            # self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0010)
-            # self.ocx.dynamicCall("DisconnectRealData(QString)", screen.S0011)
             return
 
         if subject_code not in calc.data.keys():
             return
 
+        if self.state == '대기':
+        #if 1 == 1:
+            # 켜질 때 보유 계약을 contract 에 추가
+            current_timestamp = time.time()
+            if self.timestamp != None and self.timestamp + 2 < current_timestamp and self.state == '대기':
+                self.timestamp = time.time()
+                self.get_jango_list()
+                self.get_my_deposit_info()
+                try:
+                    recent_trade_cnt = subject.info[subject_code]['신규매매수량']
+                    # recent_trade_cnt = int((db.get_recent_trade_count(self.account))[0][0])
+                    contract.recent_trade_cnt = subject.info[subject_code]['신규매매수량']
+                    if subject_code in subject.info.keys():
+                        subject.info[subject_code]['신규매매수량'] = recent_trade_cnt
+                except Exception as err:
+                    log.error("kw:525, " + err)
+
         if sRealType == '해외선물시세':
             if d.get_mode() == d.REAL:  # 실제투자
-                current_price = self.ocx.dynamicCall("GetCommRealData(QString, int)", "현재가", 140)  # 140이 뭔지 확인
-                current_time = self.ocx.dynamicCall("GetCommRealData(QString, int)", "체결시간", 20)  # 체결시간이 뭔지 확인
+                current_price = self.ocx.dynamicCall("GetCommRealData(QString, int)", "현재가", 140)
+                current_time = self.ocx.dynamicCall("GetCommRealData(QString, int)", "체결시간", 20)
+                current_volumes = int(self.ocx.dynamicCall("GetCommRealData(QString, int)", "체결량", 15))
+                if current_volumes < 0: current_volumes = current_volumes * (-1)
                 current_price = round(float(current_price), subject.info[subject_code]['자릿수'])
 
                 subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['현재가'] = current_price
@@ -695,6 +703,7 @@ class api():
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['시가'] = current_price
 
                 subject.info[subject_code]['현재가변동횟수'] += 1  # 시세 조회 횟수 누적
+                subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['거래량'] += current_volumes
 
                 if current_price > subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['고가']:
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['고가'] = current_price
@@ -717,12 +726,12 @@ class api():
                     if len(calc.data[subject_code]['현재가']) > 0:
                         calc.push(subject_code, subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
 
-                        # log.info("캔들 추가, 체결시간: " + str(current_time))
-
+                        #log.info("캔들 추가, 체결시간: " + str(current_time))
+                        log.info("캔들 정보: %s" % subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
                         log.info("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code][
-                            'flow'] + " \n/ SAR : " + str(
-                            subject.info[subject_code]['sar']) + " / 추세 : " + my_util.is_sorted(
-                            subject_code) + ", 보유계약:" + str(contract.get_contract_count(subject_code)))
+                            'flow'] + " \n SAR : " + str(
+                            subject.info[subject_code]['sar']) + ", 보유계약:" + str(contract.get_contract_count(subject_code)))
+                        log.info("subject.info[subject_code]['신규매매수량']: %s" % subject.info[subject_code]['신규매매수량'])
 
                         '''
                         if subject.info[subject_code]['flow'] == '상향': 
@@ -741,6 +750,7 @@ class api():
                     subject.info[subject_code]['현재가변동횟수'] = 0
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['고가'] = 0
                     subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['저가'] = 999999
+                    subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']]['거래량'] = 0
 
             elif d.get_mode() == d.TEST:  # 테스트
                 current_price = sRealData['현재가']
@@ -774,17 +784,7 @@ class api():
                 if contract.get_contract_count(subject_code) > 0 and subject.info[subject_code]['상태'] != '청산시도중':
                     sell_contents = None
                     next_state = '청산시도중'
-                    if subject.info[subject_code]['전략'] == '해동이':
-                        sell_contents = santa.is_it_sell(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == '파라':
-                        sell_contents = para.is_it_sell(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == '추세선밴드':
-                        sell_contents = trend_band.is_it_sell(subject_code, current_price,
-                                                              self.adjusted_price[subject_code])
-                    elif subject.info[subject_code]['전략'] == '큰파라':
-                        sell_contents = big_para.is_it_sell(subject_code, current_price)
-                    # full_para가 이렇게 복잡한 이유는 반대매매(reverse) 때문에 이렇게 된다~!
-                    elif subject.info[subject_code]['전략'] == '풀파라':
+                    if subject.info[subject_code]['전략'] == '풀파라':
                         sell_contents = full_para.is_it_sell(subject_code, current_price)
                         if sell_contents['신규주문'] == True:
                             buy_contents = full_para.is_it_OK(subject_code, current_price)
@@ -800,10 +800,6 @@ class api():
                                 if buy_contents['매도수구분'] != sell_contents['매도수구분']:
                                     sell_contents = buy_contents
                                     next_state = '매매시도중'
-                    elif subject.info[subject_code]['전략'] == 'MA30100':
-                        sell_contents = mathirtyhundred.is_it_sell(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == '남용T':
-                        sell_contents = ns.is_it_sell(subject_code, current_price)
 
                     if sell_contents['신규주문'] == True:
                         res.info('주문 체결시간 : ' + str(current_time))
@@ -841,38 +837,24 @@ class api():
 
                 # heejun add `17.9.16
                 elif contract.get_contract_count(subject_code) == 0 and subject.info[subject_code]['상태'] != '매매시도중' and \
-                                subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code][
-                    '상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
+                                subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code]['상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
                     # elif subject.info[subject_code]['상태'] != '매매시도중' and subject.info[subject_code]['상태'] != '청산시도중' and subject.info[subject_code]['상태'] != '매수중' and subject.info[subject_code]['상태'] != '매도중':
                     #################
 
                     # 리얼 데이터로 실제 1틱씩 들어올때마다 타는 플로우~!nyny
                     # contract.get_contract_count(subject_code) == 0 이게 계약수가 없을때만 살지 말지를 판단 해서 계약수가 있을때(1이상)일때는 안들어옴~!
+
                     order_contents = None
-                    if subject.info[subject_code]['전략'] == '해동이':
-                        order_contents = santa.is_it_OK(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == '파라':
-                        order_contents = para.is_it_OK(subject_code, current_price)
-                        # log.info('para.is_it_OK? ' + str(order_contents))
-                    elif subject.info[subject_code]['전략'] == '추세선밴드':
-                        order_contents = trend_band.is_it_OK(subject_code, current_price,
-                                                             self.adjusted_price[subject_code],
-                                                             max(self.current_candle[subject_code]),
-                                                             min(self.current_candle[subject_code]))
-                    elif subject.info[subject_code]['전략'] == '큰파라':
-                        order_contents = big_para.is_it_OK(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == '풀파라':
-                        if not calc.data[subject_code]['맞틀체크']:
+
+                    if subject.info[subject_code]['전략'] == '풀파라':
+                        if subject.info[subject_code]['체결미스'] == True:
+                            order_contents = post_full_para.is_it_OK(subject_code, current_price)
+                        elif not calc.data[subject_code]['맞틀체크']:
                             order_contents = full_para.is_it_OK(subject_code, current_price)
                         else: order_contents = {'신규주문':False}
 
-
                     elif subject.info[subject_code]['전략'] == '리버스온리':
                         order_contents = reverse_only.is_it_OK(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == 'MA30100':
-                        order_contents = mathirtyhundred.is_it_OK(subject_code, current_price)
-                    elif subject.info[subject_code]['전략'] == '남용T':
-                        order_contents = ns.is_it_OK(subject_code, current_price)
 
                     else:
                         return
@@ -1024,8 +1006,8 @@ class api():
                             mesu_medo_type = "신규매도"
                         elif order_info['매도수구분'] == 2:
                             mesu_medo_type = "신규매수"
-                        notification.sendMessage("신규매매[" + mesu_medo_type + "]" + str(order_info) + ', 누적 수익 : ' + str(
-                            subject.info[subject_code]['누적수익']), self.account)
+                        #notification.sendMessage("신규매매[" + mesu_medo_type + "]" + str(order_info) + ', 누적 수익 : ' + str(
+                        #    subject.info[subject_code]['누적수익']), self.account)
                         if contract.get_contract_count(subject_code) == 0:
                             if profit > 0:
                                 self.win += 1
@@ -1035,74 +1017,8 @@ class api():
                             percent = int(self.win / (self.win + self.lose) * 100)
                             print("승률:%s, 승:%s, 패:%s" % (percent, self.win, self.lose))
 
-                        '''
-                        if profit < -300 and d.get_mode() is d.TEST:
-                            #chart.draw(subject_code)
-                            input()
-                        '''
-                        if subject.info[subject_code]['전략'] == '해동이':
-                            if contract.get_contract_count(subject_code) > 0:
-                                log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                    '상태'] + ' -> 매매중.')
-                                subject.info[subject_code]['상태'] = '매매중'
-                            else:
-                                if subject.info[subject_code]['청산내용']['수량'] > 0:
-                                    log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                        '상태'] + ' -> 청산시도중.')
-                                    subject.info[subject_code]['상태'] = '청산시도중'
-                                elif order_info['매도수구분'] == 1:
-                                    if calc.data[subject_code]['추세'][calc.data[subject_code]['idx']] == '상승세':
-                                        log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                            '상태'] + ' -> 매매완료.')
-                                        subject.info[subject_code]['상태'] = '매매완료'
-                                    else:
-                                        log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                            '상태'] + ' -> 중립대기.')
-                                        subject.info[subject_code]['상태'] = '중립대기'
-                                elif order_info['매도수구분'] == 2:
-                                    if calc.data[subject_code]['추세'][calc.data[subject_code]['idx']] == '하락세':
-                                        log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                            '상태'] + ' -> 매매완료.')
-                                        subject.info[subject_code]['상태'] = '매매완료'
-                                    else:
-                                        log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                            '상태'] + ' -> 중립대기.')
-                                        subject.info[subject_code]['상태'] = '중립대기'
-                        elif subject.info[subject_code]['전략'] == '파라':
-                            if contract.get_contract_count(subject_code) > 0:
-                                if subject.info[subject_code]['청산내용']['수량'] > 0:
-                                    log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                        '상태'] + ' -> 청산시도중.')
-                                    subject.info[subject_code]['상태'] = '청산시도중'
-                                elif order_info['매도수구분'] == 1:
-                                    log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                        '상태'] + ' -> 매수중.')
-                                    subject.info[subject_code]['상태'] = '매수중'
-                                elif order_info['매도수구분'] == 2:
-                                    log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                        '상태'] + ' -> 매도중.')
-                                    subject.info[subject_code]['상태'] = '매도중'
-                                pass
-                            else:
-                                log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                    '상태'] + ' -> 매매완료.')
-                                subject.info[subject_code]['상태'] = '매매완료'
-                        elif subject.info[subject_code]['전략'] == '추세선밴드':
-                            if subject.info[subject_code]['청산내용']['수량'] > 0:
-                                log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                    '상태'] + ' -> 청산시도중.')
-                                subject.info[subject_code]['상태'] = '청산시도중'
-                            elif contract.get_contract_count(subject_code) > 0:
-                                log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                    '상태'] + ' -> 매매중.')
-                                subject.info[subject_code]['상태'] = '매매중'
-                            else:
-                                log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
-                                    '상태'] + ' -> 중립대기.')
-                                subject.info[subject_code]['상태'] = '중립대기'
-                        elif subject.info[subject_code]['전략'] == '큰파라' or subject.info[subject_code]['전략'] == '풀파라' or \
-                                        subject.info[subject_code]['전략'] == '리버스온리' or subject.info[subject_code][
-                            '전략'] == 'MA30100':
+                        if subject.info[subject_code]['전략'] == '풀파라' or subject.info[subject_code]['전략'] == '큰파라' or \
+                                        subject.info[subject_code]['전략'] == '리버스온리':
                             if contract.get_contract_count(subject_code) > 0:
                                 if subject.info[subject_code]['청산내용']['수량'] > 0:
                                     log.info("종목코드 : " + subject_code + ' 상태변경, ' + subject.info[subject_code][
@@ -1154,8 +1070,8 @@ class api():
                             mesu_medo_type = "신규매도"
                         elif order_info['매도수구분'] == 2:
                             mesu_medo_type = "신규매수"
-                        notification.sendMessage("신규매매[" + mesu_medo_type + "]" + str(order_info) + ', 누적 수익 : ' + str(
-                            subject.info[subject_code]['누적수익']), self.account)
+                        #notification.sendMessage("신규매매[" + mesu_medo_type + "]" + str(order_info) + ', 누적 수익 : ' + str(
+                        #    subject.info[subject_code]['누적수익']), self.account)
                 except Exception as err:
                     notification.sendMessage(err, self.account)
 
@@ -1196,11 +1112,10 @@ class api():
             log.critical(err_msg)
 
 
-            #if int(c_time) >= 700 or int(c_time) < 600:
-            #    # 메일 발송
-            #    if d.get_mode() == d.REAL:
-            #        # gmail.send_email('[긴급' + str(c_time) + '] 해동이 작동 중지', '에러코드')
-            #        notification.sendMessage("긴급! 해동이 작동 중지!", self.account)
+            if int(c_time) < 600 and int(c_time) > 700:
+               # 메일 발송
+               if d.get_mode() == d.REAL:
+                   notification.sendMessage("긴급! 해동이 작동 중지!", self.account)
 
             log.info("헬스 체크서버 종료")
             self.health_server_thread.server_close()
@@ -1279,8 +1194,6 @@ class api():
             contract.delete_contract(subject_code)
             subject.info[subject_code]['상태'] = '중립대기'
             if subject.info[subject_code]['전략'] == '큰파라': subject.info[subject_code]['상태'] = '매매완료'
-
-            subject.info[subject_code]['이상신호'] = False
 
     def set_jango_from_db(self):
         for subject_code in subject.info.keys():
