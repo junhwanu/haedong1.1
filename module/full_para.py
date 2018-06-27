@@ -35,11 +35,11 @@ def is_it_OK(subject_code, current_price):
     param12 = 35
     param13 = 20
 
-
+    subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['기본1차청산틱']
     #log.info("full_para.py is_it_ok()")
 
     # 300캔들이 없으면 매매 안함
-    if calc.data[subject_code]['idx'] < 3000:
+    if calc.data[subject_code]['idx'] < 5500:
         return false
 
     if subject.info[subject_code]['상태'] == '매수중' or subject.info[subject_code]['상태'] == '매도중' or \
@@ -167,6 +167,7 @@ def is_it_OK(subject_code, current_price):
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
             if calc.flow_candle_count_list[-1] <= param01:
                 log.info("틀맞틀 로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['틀맞틀-청산틱']
             else:
                 log.info("틀맞틀일때 지난 플로우 캔들 수가 %s(현재 %s) 이상으로 매매 안합니다" % (param01, calc.flow_candle_count_list[-1]))
                 calc.data[subject_code]['맞틀체크'] = True
@@ -217,6 +218,7 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀맞맞 다음으로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀맞맞-청산틱']
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '맞']:
@@ -225,6 +227,7 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀틀맞 다음으로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀맞-청산틱']
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '맞']:
@@ -263,6 +266,7 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀틀틀 다음으로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀틀-청산틱']
                 pass
 
         # elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '맞'] and profit > reverse_tic:
@@ -304,6 +308,7 @@ def is_it_OK(subject_code, current_price):
         elif subject.info[subject_code]['맞틀리스트'][-2:] == ['틀', '맞'] and profit < 0:
             if calc.flow_candle_count <= param01:
                 log.info("틀맞틀 로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['틀맞틀-청산틱']
             else:
                 log.info("틀맞틀일때 지난 플로우 캔들 수가 %s(현재 %s) 이상으로 매매 안합니다" % (param01, calc.flow_candle_count))
                 return false
@@ -352,6 +357,7 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀맞맞 다음으로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀맞맞-청산틱']
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['맞', '틀', '틀'] and profit > 0:
@@ -360,6 +366,7 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀틀맞 다음으로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀맞-청산틱']
                 pass
 
         elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '틀', '틀'] and profit > 0:
@@ -396,6 +403,7 @@ def is_it_OK(subject_code, current_price):
                 return false
             else:
                 log.info("맞틀틀틀 다음으로 매매 진입합니다.")
+                subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀틀-청산틱']
                 pass
 
         # elif subject.info[subject_code]['맞틀리스트'][-2:] == ['맞', '틀'] and profit > reverse_tic:
@@ -487,7 +495,8 @@ def is_it_sell(subject_code, current_price):
     # log.info('%s : current_price : %s sar : %s' % (str(calc.data[subject_code]['체결시간'][-1])[4:14], current_price, subject.info[subject_code]['sar']))
 
     try:
-        first_chungsan = 70
+        #first_chungsan = 70
+        first_chungsan = subject.info[subject_code]['1차청산틱']
         first_chungsan_dribble = 2
 
         second_chungsan = 999

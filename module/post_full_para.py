@@ -131,6 +131,7 @@ def is_it_OK(subject_code, current_price):
     elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
         if calc.flow_candle_count_list[-1] <= param01:
             log.info("[post_full_para] 틀맞틀 로 매매 진입합니다.")
+            subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['틀맞틀-청산틱']
         else:
             log.info("[post_full_para] 틀맞틀일때 지난 플로우 캔들 수가 %s(현재 %s) 이상으로 매매 안합니다" % (param01, calc.flow_candle_count_list[-1]))
             return false
@@ -165,6 +166,7 @@ def is_it_OK(subject_code, current_price):
             return false
         else:
             log.info("[post_full_para] 맞틀맞맞 다음으로 매매 진입합니다.")
+            subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀맞맞-청산틱']
             pass
 
     elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '맞']:
@@ -173,6 +175,7 @@ def is_it_OK(subject_code, current_price):
             return false
         else:
             log.info("[post_full_para] 맞틀틀맞 다음으로 매매 진입합니다.")
+            subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀맞-청산틱']
             pass
 
     elif subject.info[subject_code]['맞틀리스트'][-4:] == ['틀', '틀', '틀', '맞']:
@@ -205,6 +208,7 @@ def is_it_OK(subject_code, current_price):
             return false
         else:
             log.info("[post_full_para] 맞틀틀틀 다음으로 매매 진입합니다.")
+            subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀틀-청산틱']
             pass
 
     else:
