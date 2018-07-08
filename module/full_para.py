@@ -21,19 +21,35 @@ def is_it_OK(subject_code, current_price):
     time_check_is_true = True
     reverse_tic = subject.info[subject_code]['반대매매틱']
 
-    param01 = 160
-    param02 = 560
-    param03 = 10
-    param04 = 720
-    param05 = -16  #-24
-    param06 = 40
-    param07 = 20
-    param08 = -40
-    param09 = 115 #140
-    param10 = 200
-    param11 = 30
-    param12 = 35
-    param13 = 20
+    # param01 = 160
+    # param02 = 560
+    # param03 = 10
+    # param04 = 720
+    # param05 = -16  #-24
+    # param06 = 40
+    # param07 = 20
+    # param08 = -40
+    # param09 = 115 #140
+    # param10 = 200
+    # param11 = 30
+    # param12 = 35
+    # param13 = 20
+
+    param01 = subject.info[subject_code]['param01']
+    param02 = subject.info[subject_code]['param02']
+    param03 = subject.info[subject_code]['param03']
+    param04 = subject.info[subject_code]['param04']
+    param05 = subject.info[subject_code]['param05']
+    param06 = subject.info[subject_code]['param06']
+    param07 = subject.info[subject_code]['param07']
+    param08 = subject.info[subject_code]['param08']
+    param09 = subject.info[subject_code]['param09']
+    param10 = subject.info[subject_code]['param10']
+    param11 = subject.info[subject_code]['param11']
+    param12 = subject.info[subject_code]['param12']
+    param13 = subject.info[subject_code]['param13']
+    param14 = subject.info[subject_code]['param14']
+    param15 = subject.info[subject_code]['param15']
 
     subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['기본1차청산틱']
     #log.info("full_para.py is_it_ok()")
@@ -151,7 +167,9 @@ def is_it_OK(subject_code, current_price):
 
         elif calc.flow_candle_count_list[-1] <= param09:
             ma_line_is_true = True
-            log.info("지난 캔들이 140개 이하로 진입")
+            log.info("지난 캔들이 %s개 이하로 진입" % param09)
+            if calc.flow_candle_count_list[-1] <= param14 and calc.flow_candle_count_list[-2] >= param15:
+                time_check_is_true = False
             pass
 
         elif subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] < param08:
@@ -293,7 +311,9 @@ def is_it_OK(subject_code, current_price):
 
         elif calc.flow_candle_count <= param09:
             ma_line_is_true = True
-            log.info("지난 캔들이 140개 이하로 진입")
+            log.info("지난 캔들이 %s개 이하로 진입" % param09)
+            if calc.flow_candle_count <= param14 and calc.flow_candle_count_list[-1] >= param15:
+                time_check_is_true = False
             pass
 
         elif profit < param08:
