@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
 import log, calc, santa, screen, tester, full_para, contract, reverse_only, post_full_para
-import auto_login
+#import auto_login
 import define as d
 import subject
 import my_util
@@ -88,8 +88,8 @@ class api():
                 print("연결 성공")
 
                 # auto login
-                login_thr = auto_login.Login()
-                login_thr.start()
+                #login_thr = auto_login.Login()
+                #login_thr.start()
 
                 # health server run
                 self.health_server_thread = health_server.HealthConnectManager()
@@ -369,6 +369,22 @@ class api():
                             calc.data[subject_code]['플로우'][-1] == '하향' and order_contents['매도수구분'] == '신규매수'):
                         log.info("반대매매 True로 변경.")
                         subject.info[subject_code]['반대매매'] = True
+                    if calc.flow_candle_count_list[-1] <= subject.info[subject_code]['param09']:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['기본1차청산틱']
+                    elif subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] < subject.info[subject_code]['param08']:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['기본1차청산틱']
+                    elif subject.info[subject_code]['맞틀리스트'][-3:] == ['틀', '맞', '틀']:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['틀맞틀-청산틱']
+                    elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '맞', '맞']:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀맞맞-청산틱']
+                    elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '맞']:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀맞-청산틱']
+                    elif subject.info[subject_code]['맞틀리스트'][-4:] == ['맞', '틀', '틀', '틀']:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['맞틀틀틀-청산틱']
+                    else:
+                        subject.info[subject_code]['1차청산틱'] = subject.info[subject_code]['기본1차청산틱']
+
+
             except Exception as err:
                 log.error(err)
 
@@ -725,23 +741,15 @@ class api():
 
                     if len(calc.data[subject_code]['현재가']) > 0:
                         calc.push(subject_code, subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
+                        calc.data['금일캔들수'] = calc.data['금일캔들수'] + 1
 
-                        #log.info("캔들 추가, 체결시간: " + str(current_time))
-                        log.info("캔들 정보: %s" % subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
+                        #log.info("캔들 추가, 금일캔들수: " + str(calc.data['금일캔들수']))
+                        #log.info("캔들 정보: %s" % subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
                         log.info("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code][
                             'flow'] + " \n SAR : " + str(
                             subject.info[subject_code]['sar']) + ", 보유계약:" + str(contract.get_contract_count(subject_code)))
-                        log.info("subject.info[subject_code]['신규매매수량']: %s" % subject.info[subject_code]['신규매매수량'])
+                        log.info("subject['신규매매수량']: %s, 1차청산틱: %s, 금일캔들수:%s" % (subject.info[subject_code]['신규매매수량'], subject.info[subject_code]['1차청산틱'], calc.data['금일캔들수']))
 
-                        '''
-                        if subject.info[subject_code]['flow'] == '상향': 
-                            log.debug("매수 예정가 : " + str(calc.data[subject_code]['추세선'][-1] - 5 * subject.info[subject_code]['단위']))
-                        elif subject.info[subject_code]['flow'] == '하향': 
-                            log.debug("매도 예정가 : " + str(calc.data[subject_code]['추세선'][-1] + 5 * subject.info[subject_code]['단위']))
-                        log.debug("추세선 : " + str(calc.data[subject_code]['추세선'][-1]))
-                        log.debug("추세선밴드 상한 : " + str(calc.data[subject_code]['추세선밴드']['상한선'][-1]))
-                        log.debug("추세선밴드 하한 : " + str(calc.data[subject_code]['추세선밴드']['하한선'][-1]))
-                        '''
                     else:
                         self.temp_candle[subject_code].append(
                             subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
@@ -931,7 +939,7 @@ class api():
 
         elif sGubun == '1':
 
-            log.info('체결잔고')
+            log.info('체결잔고, 금일캔들수:%s' % calc.data['금일캔들수'])
             if d.get_mode() == d.REAL:
                 self.get_my_deposit_info()
 

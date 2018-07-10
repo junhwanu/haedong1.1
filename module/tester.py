@@ -57,8 +57,13 @@ def init():
                 candle['현재가'] = float(tick[1])
                 candle['거래량'] += int(tick[2])
                 #candle['체결시간'] = tick[0]
-                if candle['체결시간'] == 0: candle['체결시간'] = tick[0].strftime('%Y%m%d%H%M%S')
-                candle['영업일자'] = tick[3].strftime('%Y%m%d')
+                if candle['체결시간'] == 0:
+                    candle['체결시간'] = tick[0].strftime('%Y%m%d%H%M%S')
+                if candle['영업일자'] != tick[3].strftime('%Y%m%d'):
+                    candle['영업일자'] = tick[3].strftime('%Y%m%d')
+                    calc.data['금일캔들수'] = 0
+                    # print(" !!!      candle['영업일자']:%s" % candle['영업일자'])
+                    # print(" !!!      체결 시간:%s" % candle['체결시간'])
                 
                 if tick_cnt == 0:
                     candle['시가'] = float(tick[1])
@@ -82,7 +87,8 @@ def init():
                     #res.info(str(candle))
                     kw.OnReceiveTrData(subject.info[subject_code]['화면번호'], '해외선물옵션틱그래프조회', None, None, None, candle)
                     #log.info("캔들 추가, %s" % candle)
-                    candle = {'현재가':0, '거래량':0, '체결시간':0, '시가':0, '고가':0, '저가':999999999, '영업일자':0}
+                    calc.data['금일캔들수'] = calc.data['금일캔들수'] + 1
+                    candle = {'현재가':0, '거래량':0, '체결시간':0, '시가':0, '고가':0, '저가':999999999, '영업일자':tick[3].strftime('%Y%m%d')}
                     #input()
             else:
                 print(str(date) + ' 테스트 종료.')

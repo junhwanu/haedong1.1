@@ -23,19 +23,21 @@ def is_it_OK(subject_code, current_price):
 
     subject.info[subject_code]['체결미스'] = False
 
-    param01 = 160
-    param02 = 560
-    param03 = 10
-    param04 = 720
-    param05 = -16  #-24
-    param06 = 40
-    param07 = 20
-    param08 = -40
-    param09 = 115 #140
-    param10 = 200
-    param11 = 30
-    param12 = 35
-    param13 = 20
+    param01 = subject.info[subject_code]['param01']
+    param02 = subject.info[subject_code]['param02']
+    param03 = subject.info[subject_code]['param03']
+    param04 = subject.info[subject_code]['param04']
+    param05 = subject.info[subject_code]['param05']
+    param06 = subject.info[subject_code]['param06']
+    param07 = subject.info[subject_code]['param07']
+    param08 = subject.info[subject_code]['param08']
+    param09 = subject.info[subject_code]['param09']
+    param10 = subject.info[subject_code]['param10']
+    param11 = subject.info[subject_code]['param11']
+    param12 = subject.info[subject_code]['param12']
+    param13 = subject.info[subject_code]['param13']
+    param14 = subject.info[subject_code]['param14']
+    param15 = subject.info[subject_code]['param15']
 
     # 300캔들이 없으면 매매 안함
     if calc.data[subject_code]['idx'] < 3000:
@@ -116,7 +118,9 @@ def is_it_OK(subject_code, current_price):
 
     elif calc.flow_candle_count_list[-1] <= param09:
         ma_line_is_true = True
-        log.info("[post_full_para] 지난 캔들이 140개 이하로 진입")
+        log.info("[post_full_para] 지난 캔들이 %s개 이하로 진입" % param09)
+        if calc.flow_candle_count_list[-1] <= param14 and calc.flow_candle_count_list[-2] >= param15:
+            time_check_is_true = False
         pass
 
     elif subject.info[subject_code]['맞틀리스트'][-1] == '틀' and subject.info[subject_code]['수익리스트'][-1] < param08:
@@ -221,8 +225,39 @@ def is_it_OK(subject_code, current_price):
     current_time = int(str(calc.data[subject_code]['체결시간'][passed_candle_count+1])[8:12])
 
     if current_time <= int(subject.info[subject_code]['시작시간']) and current_time >= int(subject.info[subject_code]['마감시간']):
-        log.info("[post_full_para] 장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
-        return false
+        # log.info("[post_full_para] 장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
+        # return false
+        if calc.data['금일캔들수'] == 0:  # 당일 첫 캔들에 반전 된 상황
+            if mesu_medo_type == '신규매도':
+                if calc.data[subject_code]['저가'][-1] - current_price > 10 * subject.info[subject_code]['단위']:
+                    log.info("[post_full_para]장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
+                    return false
+                else:
+                    pass
+            elif mesu_medo_type == '신규매수':
+                if current_price - calc.data[subject_code]['고가'][-1] > 10 * subject.info[subject_code]['단위']:
+                    log.info("[post_full_para]장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
+                    return false
+                else:
+                    pass
+
+        elif calc.data['금일캔들수'] == 1:  # 당일 첫 캔들 60번째 반전이거나 2번째 캔들에서 반전 된 상황
+            if mesu_medo_type == '신규매도':
+                if calc.data[subject_code]['저가'][-2] - calc.data[subject_code]['고가'][-1] > 10 * \
+                        subject.info[subject_code]['단위']:
+                    log.info("[post_full_para]장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
+                    return false
+                else:
+                    pass
+            elif mesu_medo_type == '신규매수':
+                if calc.data[subject_code]['저가'][-1] - calc.data[subject_code]['고가'][-2] > 10 * \
+                        subject.info[subject_code]['단위']:
+                    log.info("[post_full_para]장 시작 시간, 마감 시간 정각에 매매하지 않습니다. 매매금지")
+                    return false
+                else:
+                    pass
+        else:
+            pass
 
     if subject_code[:3] == "GCZ" or subject_code[:3] == "GCQ":
         if current_time > 2100 and current_time < 2230 and subject.info[subject_code]['반대매매'] == False and time_check_is_true == True:
