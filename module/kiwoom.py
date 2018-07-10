@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys, time, os
 import log, calc, santa, screen, tester, full_para, contract, reverse_only, post_full_para
-#import auto_login
+import auto_login
 import define as d
 import subject
 import my_util
@@ -63,7 +63,7 @@ class api():
             self.timestamp = time.time()
 
             if self.connect() == 0:
-                # auto_login.init()
+                #auto_login.init()
                 self.app.exec_()
 
 
@@ -88,8 +88,8 @@ class api():
                 print("연결 성공")
 
                 # auto login
-                #login_thr = auto_login.Login()
-                #login_thr.start()
+                login_thr = auto_login.Login()
+                login_thr.start()
 
                 # health server run
                 self.health_server_thread = health_server.HealthConnectManager()
@@ -743,7 +743,7 @@ class api():
                         calc.push(subject_code, subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
                         calc.data['금일캔들수'] = calc.data['금일캔들수'] + 1
 
-                        #log.info("캔들 추가, 금일캔들수: " + str(calc.data['금일캔들수']))
+                        #log.info("캔들 추가, 체결시간: " + str(current_time))
                         #log.info("캔들 정보: %s" % subject.info[subject_code]['현재캔들'][subject.info[subject_code]['시간단위']])
                         log.info("종목코드(" + subject_code + ")  현재 Flow : " + subject.info[subject_code][
                             'flow'] + " \n SAR : " + str(

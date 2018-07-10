@@ -1,8 +1,6 @@
 ﻿# -*- coding: utf-8 -*-
 import screen
 
-import define as d
-
 info = {
     "GC": {
         "종목명": "GOLD",
@@ -49,7 +47,22 @@ info = {
         "틀맞틀-청산틱":200,
         "맞틀맞맞-청산틱":100,
         "맞틀틀맞-청산틱":150,
-        "맞틀틀틀-청산틱":150
+        "맞틀틀틀-청산틱":150,
+        "param01":160,
+        "param02":560,
+        "param03":10,
+        "param04":720,
+        "param05":-16,
+        "param06":40,
+        "param07":20,
+        "param08":-40,
+        "param09":115,
+        "param10":200,
+        "param11":30,
+        "param12":35,
+        "param13":20,
+        "param14":90,
+        "param15":200
     }
 }
 
